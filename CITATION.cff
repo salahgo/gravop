@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+title: "GravOp: conditioning-coordinate benchmarks for neural PDE surrogates, with a gravothermal self-interacting dark matter solver and emulator"
+abstract: "Reference implementation, benchmark generators and acceptance suite for a study of how the conditioning coordinate of a neural operator determines its accuracy when the terminal time it is trained against is unavailable at deployment. The source release contains four reference PDE systems whose evolution ends at a solution-dependent event time (three at a finite-time singularity, one a regular viscous control), a validated gravothermal self-interacting dark matter fluid solver, a Fourier neural operator emulator, a Bayesian inference pipeline, the figure scripts, and the acceptance suite that checks the reported results against the solver, the data and the stored records. The machine-readable results and the rendered figures are deposited in a companion archival record."
+version: "1.0.0"
+date-released: "2026-09-26"
+license: GPL-3.0-or-later
+repository-code: "https://github.com/salahgo/gravop"
+url: "https://github.com/salahgo/gravop"
+authors:
+  - family-names: Gontara
+    given-names: Salah
+    affiliation: "Ecole Polytechnique de Sousse, Sousse, 4021, Tunisia"
+keywords:
+  - neural operator
+  - finite-time singularity
+  - surrogate model
+  - operator learning
+  - self-interacting dark matter
+  - gravothermal collapse

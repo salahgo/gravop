@@ -1,0 +1,41 @@
+name: Bug report
+description: Something in the code behaves incorrectly
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        For a problem reproducing a published number or a gate failure, use the
+        reproduction report template instead.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: The command you ran and the output, verbatim.
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+      description: The release tag, or the commit you are on.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: |
+        Output of `python -c "import sys, numpy, scipy, numba; print(sys.version, numpy.__version__, scipy.__version__, numba.__version__)"`,
+        plus the operating system. Add the PyTorch and CUDA versions if the
+        problem involves the emulator.
+      render: shell
+    validations:
+      required: true

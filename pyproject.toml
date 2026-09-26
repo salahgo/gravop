@@ -1,0 +1,54 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gravop"
+version = "1.0.0"
+description = "Conditioning-coordinate benchmarks for neural PDE surrogates, with a gravothermal self-interacting dark matter solver and emulator"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "GPL-3.0-or-later"}
+authors = [{name = "Salah Gontara", email = "salah.gontara@polytecsousse.tn"}]
+keywords = ["neural operator", "surrogate model", "finite-time singularity",
+            "blow-up", "operator learning", "self-interacting dark matter",
+            "gravothermal", "computational physics"]
+classifiers = [
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+  "Programming Language :: Python :: 3",
+  "Topic :: Scientific/Engineering :: Mathematics",
+  "Topic :: Scientific/Engineering :: Physics",
+  "Topic :: Scientific/Engineering :: Astronomy",
+]
+dependencies = [
+  "numpy>=1.26",
+  "scipy>=1.11",
+  "numba>=0.59",
+  "h5py>=3.10",
+]
+
+[project.urls]
+Repository = "https://github.com/salahgo/gravop"
+
+[project.optional-dependencies]
+ml = ["torch>=2.1"]
+inference = ["emcee>=3.1", "corner>=2.2"]
+plots = ["matplotlib>=3.8"]
+# pytest is in `all` because the documented path is `pip install -e ".[all]"`
+# followed by the acceptance suite.
+test = ["pytest>=8"]
+all = ["torch>=2.1", "emcee>=3.1", "corner>=2.2", "matplotlib>=3.8",
+       "pytest>=8"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# An acceptance gate that reads a stored number preserves a wrong one as
+# faithfully as a right one, so each gate declares which kind it is:
+markers = [
+  "verification: the assertion is computed in-process from a source of truth -- the solver, the data, the model code or a checkpoint's own behaviour -- so a wrong number stored in results/ cannot make it pass",
+  "regression: at least one asserted value is read from a stored artefact under results/ (or from a document compared against one), so it pins internal consistency and provenance rather than correctness",
+]

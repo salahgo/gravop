@@ -1,0 +1,23 @@
+{
+  "title": "GravOp: conditioning-coordinate benchmarks for neural PDE surrogates, with a gravothermal self-interacting dark matter solver and emulator",
+  "upload_type": "software",
+  "description": "Reference implementation, benchmark generators and acceptance suite for a study of how the conditioning coordinate of a neural operator determines its accuracy when the terminal time it is trained against is unavailable at deployment. The source release contains four reference PDE systems whose evolution ends at a solution-dependent event time (three at a finite-time singularity, one a regular viscous control), a validated gravothermal self-interacting dark matter fluid solver, a Fourier neural operator emulator, a Bayesian inference pipeline, the figure scripts, and the acceptance suite that checks the reported results against the solver, the data and the stored records. The machine-readable results and the rendered figures are deposited in a companion archival record.",
+  "creators": [
+    {
+      "name": "Gontara, Salah",
+      "affiliation": "Ecole Polytechnique de Sousse, Sousse, 4021, Tunisia"
+    }
+  ],
+  "license": "GPL-3.0-or-later",
+  "version": "1.0.0",
+  "language": "eng",
+  "keywords": [
+    "neural operator",
+    "finite-time singularity",
+    "surrogate model",
+    "operator learning",
+    "self-interacting dark matter",
+    "gravothermal collapse"
+  ],
+  "notes": "The machine-readable results and the rendered figures are in a companion archival record; extract its results/ into a checkout of this release at the same version tag to run the acceptance suite. Each tree carries a MANIFEST.sha256, and the SHA-256 of that manifest names the snapshot."
+}

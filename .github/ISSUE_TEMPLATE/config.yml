@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Reproduction guide
+    url: https://github.com/salahgo/gravop/blob/main/REPRODUCING.md
+    about: How the two trees fit together, what each reproduction target establishes, and what it needs.

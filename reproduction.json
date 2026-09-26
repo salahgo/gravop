@@ -1,0 +1,176 @@
+{
+  "scope": "Current verification and explicit canonical method stages; historical application rebuild remains separate.",
+  "targets": {
+    "verify": {
+      "steps": [
+        {
+          "command": [
+            "{python}",
+            "-m",
+            "pytest",
+            "tests/",
+            "-q"
+          ],
+          "requires": [
+            "tests"
+          ]
+        }
+      ]
+    },
+    "methods": {
+      "steps": [
+        {
+          "command": [
+            "{python}",
+            "scripts/sc_experiment.py",
+            "--all",
+            "--seeds",
+            "3",
+            "--epochs",
+            "200",
+            "--ckpt-dir"
+          ],
+          "requires": [
+            "data/sc/rd.h5",
+            "data/sc/ks.h5",
+            "data/sc/film.h5",
+            "data/sc/burgers.h5",
+            "data/sc/sidm.h5"
+          ],
+          "produces": [
+            "results/statecond/ckpt"
+          ]
+        },
+        {
+          "command": [
+            "{python}",
+            "scripts/sc_timehead.py",
+            "--all",
+            "--seeds",
+            "3",
+            "--budgets",
+            "200",
+            "600",
+            "2000",
+            "6000",
+            "20000",
+            "--save-heads"
+          ],
+          "requires": [
+            "results/statecond/ckpt"
+          ],
+          "produces": [
+            "results/statecond/timehead.json"
+          ]
+        },
+        {
+          "command": [
+            "{python}",
+            "scripts/sc_direct.py",
+            "--all",
+            "--seeds",
+            "3",
+            "--epochs",
+            "200"
+          ],
+          "requires": [
+            "results/statecond/ckpt"
+          ],
+          "produces": [
+            "results/statecond/direct.json"
+          ]
+        },
+        {
+          "command": [
+            "{python}",
+            "scripts/sc_contract.py",
+            "--all",
+            "--seeds",
+            "3"
+          ],
+          "requires": [
+            "results/statecond/timehead.json",
+            "results/statecond/direct.json"
+          ],
+          "produces": [
+            "results/statecond/contract.json"
+          ]
+        }
+      ]
+    },
+    "forecast-results": {
+      "steps": [
+        {
+          "command": [
+            "{python}",
+            "scripts/forecast_validation_audit.py",
+            "--device",
+            "cpu"
+          ],
+          "requires": [
+            "results/forecast_validation/execution_provenance.json",
+            "results/forecast_validation/application/sidm_full_s0/model.pt",
+            "results/forecast_validation/application/sidm_full_s1/model.pt",
+            "results/forecast_validation/application/sidm_full_s2/model.pt"
+          ]
+        },
+        {
+          "command": [
+            "{python}",
+            "scripts/forecast_posterior_refine_report.py"
+          ],
+          "requires": [
+            "results/forecast_posterior_refine/validation.json",
+            "data/d1/forecast_posterior_refine/latest_rule.npz"
+          ]
+        }
+      ]
+    },
+    "final-validation": {
+      "steps": [
+        {
+          "command": [
+            "{python}",
+            "scripts/forecast_final_validate.py",
+            "--workers",
+            "24"
+          ],
+          "requires": [
+            "results/forecast_posterior_refine/validation.json",
+            "data/d1/forecast_numerics/pilot_observations.npz"
+          ]
+        }
+      ]
+    },
+    "fresh-confirmation": {
+      "steps": [
+        {
+          "command": [
+            "{python}",
+            "scripts/forecast_fresh_confirmation.py",
+            "--workers",
+            "24"
+          ],
+          "requires": [
+            "results/forecast_final/diagnostics_passed.json"
+          ]
+        }
+      ]
+    },
+    "gpu-results": {
+      "steps": [
+        {
+          "command": [
+            "{python}",
+            "scripts/audit_gpu_solver.py"
+          ],
+          "requires": [
+            "results/gpu_solver/pcr_trial/config.json",
+            "results/gpu_solver/pcr_trial/decision.json",
+            "data/d1/forecast_numerics/pilot_observations.npz"
+          ]
+        }
+      ]
+    }
+  }
+}

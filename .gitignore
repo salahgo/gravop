@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+.pytest_cache/
+
+# Generated inputs and outputs. The trajectory ensembles and the trained
+# weights are regenerable from the released generators with the recorded
+# seeds; the machine-readable results live in the archival deposit and are
+# unpacked here by a reader who wants to run the full acceptance suite.
+# data/sc/manifest.json is the one tracked file under data/: the generation
+# record of the benchmark sets. Everything else there is regenerated.
+data/*
+!data/sc/
+data/sc/*
+!data/sc/manifest.json
+results/
+logs/
+*.npz
+*.pt
+*.h5
+
+# Downloaded or unpacked archival record, and local scratch output
+*.zip
+record/
+*.log
+
+# Local environment, tooling and editor state
+.env
+.env.*
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+*.swp

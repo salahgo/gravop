@@ -1,0 +1,42 @@
+{
+ "rd": {
+  "requested": 600,
+  "failed": 0,
+  "nonsingular": 8,
+  "kept": 592,
+  "gen_seconds": 2.2,
+  "path": "data/sc/rd.h5",
+  "fields": 1,
+  "tau_points": 48
+ },
+ "ks": {
+  "requested": 600,
+  "failed": 0,
+  "nonsingular": 0,
+  "kept": 600,
+  "gen_seconds": 6.7,
+  "path": "data/sc/ks.h5",
+  "fields": 1,
+  "tau_points": 48
+ },
+ "film": {
+  "requested": 600,
+  "failed": 0,
+  "nonsingular": 0,
+  "kept": 600,
+  "gen_seconds": 4.6,
+  "path": "data/sc/film.h5",
+  "fields": 1,
+  "tau_points": 48
+ },
+ "burgers": {
+  "requested": 600,
+  "failed": 0,
+  "nonsingular": 9,
+  "kept": 591,
+  "gen_seconds": 1.5,
+  "path": "data/sc/burgers.h5",
+  "fields": 1,
+  "tau_points": 48
+ }
+}

@@ -1,0 +1,45 @@
+name: Reproduction report
+description: A published number, gate or figure does not reproduce
+labels: [reproduction]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Digest mismatches are the most useful thing to report: they say whether
+        the trees moved or the environment did. Get them with
+        `scripts/verify_release.sh <tree>`.
+  - type: input
+    id: source-digest
+    attributes:
+      label: Source tree digest
+      description: First 16 characters are enough.
+    validations:
+      required: true
+  - type: input
+    id: archive-digest
+    attributes:
+      label: Archive record digest
+      description: Leave blank if you have not unpacked the archival record.
+  - type: textarea
+    id: command
+    attributes:
+      label: Command and output
+      description: What you ran, and what it printed.
+      render: shell
+    validations:
+      required: true
+  - type: input
+    id: claim
+    attributes:
+      label: Which claim
+      description: The section, table, figure or gate name that disagrees.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Operating system, Python version, and whether a GPU was used.
+      render: shell
+    validations:
+      required: true
