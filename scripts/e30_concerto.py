@@ -4,7 +4,7 @@ THE ANSWER TO THE QUESTION ASKED, FIRST
 ---------------------------------------
 P28 asked for a **second calibration of the conductivity constant** `C_eff`,
 which is currently fitted to a single isolated N-body run (Fischer, Yu & Dolag;
-`C_eff = 0.797`). **The public SIDM Concerto release cannot provide one.**
+`C_eff = 0.712`; recorded as 0.797 before the 2026-10-09 correction). **The public SIDM Concerto release cannot provide one.**
 `C_eff` sets the gravothermal *rate*, so calibrating it requires the halo's
 evolution in time, and the release contains:
 
@@ -197,7 +197,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--n', type=int, default=120,
                     help='haloes to evaluate (0 = all)')
-    ap.add_argument('--c-eff', type=float, default=0.797)
+    ap.add_argument('--c-eff', type=float, default=0.712)
     ap.add_argument('--min-vmax', type=float, default=8.0,
                     help='drop the poorly resolved tail; the suite resolves '
                          'haloes down to vmax ~3 km/s but an NFW fit there '

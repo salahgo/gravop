@@ -50,9 +50,11 @@ They need the trained weights, which are not archived. Step 5 needs nothing
 but the two trees.
 
 ```bash
-# 1. the decomposition and the metric bridge  (GPU, ~2 min)
+# 1. the decomposition, the metric bridge, and the displacement recomputed
+#    from the validation split's clock errors (GPU ~2 min; the last on CPU)
 python scripts/sc_decomposition.py  --device cuda:0
 python scripts/sc_metric_bridge.py  --device cuda:0
+python scripts/sc_deployable_displacement.py
 
 # 2. the calibration, on both input paths    (GPU, ~10 s)
 python scripts/sc_conformal.py          --device cuda:0

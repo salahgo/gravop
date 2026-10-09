@@ -254,8 +254,8 @@ def test_the_rate_scan_excludes_the_isolated_run_conductivity():
     assert R['result']['interior']
     bs = R['C_eff_bootstrap']
     assert bs['frac_at_or_above_isolated_value'] == 0.0
-    assert bs['ci95'][1] < 0.797
-    assert R['censoring_bias']['best_C_eff_uncensored_worst_case'] < 0.797
+    assert bs['ci95'][1] < R['result']['isolated_run_value']
+    assert R['censoring_bias']['best_C_eff_uncensored_worst_case'] < R['result']['isolated_run_value']
 
 
 @pytest.mark.regression
@@ -297,13 +297,13 @@ def test_the_reference_converges_cleanly_in_shell_count():
 
 @pytest.mark.regression
 def test_the_shell_count_bias_cannot_explain_the_conductivity_gap():
-    """E40 fits C_eff = 0.20 against an isolated-run 0.797. The reference's
+    """E40 fits C_eff = 0.20 against an isolated-run 0.712. The reference's
     spatial error biases that fit LOW, so it pushes in the direction that
     would manufacture the gap -- which is exactly why its size is gated."""
     S = _load('e40', 'reference_convergence.json')['summary']
     assert S['max_rel_error_at_150_shells'] < 0.05
     R = _load('e40', 'rate.json')
-    gap = 0.797 / R['result']['best_C_eff']
+    gap = R['result']['isolated_run_value'] / R['result']['best_C_eff']
     assert gap > 2.0, gap
     assert S['max_rel_error_at_150_shells'] * 100 < gap
 
@@ -396,6 +396,42 @@ def test_the_prospective_result_is_not_described_as_an_improvement():
     worse = [s for s in pro if pro[s] > ret[s]['rms_log_residual']]
     assert len(worse) == 3, sorted(worse)
     assert set(worse) == {'rd', 'ks', 'burgers'}, sorted(worse)
+
+
+@pytest.mark.regression
+def test_the_displacement_without_clock_truth_is_scored_as_stated():
+    """E45: F from the validation split's clock errors, scored by the frozen rule.
+
+    The realised construction must reproduce the stored F that the in-sample
+    and reserved scores used, each score must be the frozen rule applied to the
+    stored E_A and E_dep, and the reading the text rests on -- looser than the
+    realised score, still ahead of a fitted constant on the mean, behind it in
+    at least one system -- must hold for every construction.
+    """
+    D = _load('statecond', 'deployable_displacement.json')
+    pts = {'in_sample': _load('statecond', 'decomposition.json'),
+           'reserved': _load('e43', 'prospective.json')['points']}
+    for reg, points in pts.items():
+        blk = D[reg]
+        for sysname, f in blk['F'].items():
+            assert abs(f['realised'] / blk['F_stored'][sysname] - 1) < 1e-4
+        for kind in ('realised', 'val_errors', 'val_only', 'val_median'):
+            per = {}
+            for k, p in points.items():
+                sysname, bb = k.rsplit('_', 1)
+                if bb not in ('fno', 'cno', 'transformer'):
+                    continue
+                pred = np.hypot(p['E_A'], blk['F'][sysname][kind]) / p['E_A']
+                per.setdefault(sysname, []).append(
+                    np.log10(pred / (p['E_dep'] / p['E_A'])))
+            mean = float(np.mean([np.sqrt(np.mean(np.square(v)))
+                                  for v in per.values()]))
+            assert abs(mean - blk[kind]['mean_of_system_rms']) < 1e-9, (reg, kind)
+            vs = blk['against_constant'][kind]
+            assert vs['factor_on_mean'] > 1, (reg, kind)
+            if kind != 'realised':
+                assert blk[kind]['mean_of_system_rms'] > blk['realised']['mean_of_system_rms']
+                assert vs['systems_behind_constant'], (reg, kind)
 
 
 # ------------------- E44: the hand inspection the data's authors asked for

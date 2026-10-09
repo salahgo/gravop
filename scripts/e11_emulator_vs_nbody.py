@@ -8,7 +8,7 @@ solver call at prediction time.
 The halo is NFW with a constant cross-section sigma-hat = 0.9455, inside the
 constant-cross-section branch of the training distribution. The emulator
 reproduces the C = 0.753 fluid model, so the same single time-rescaling
-calibration used in Section 3.5 (s = 0.945, i.e. C_eff = 0.797) is applied to
+calibration used in Section 3.5 (s = 0.945, i.e. C_eff = C * s = 0.712) is applied to
 the N-body times; no other freedom is used.
 
 TWO CONDITIONINGS (P2). `--conditioning tau` is the original arm:
@@ -47,7 +47,7 @@ os.makedirs(OUT, exist_ok=True)
 
 R_S, RHO_S, T0G = 1.28, 4.42e7, 0.02045991174237841
 SIGMA_HAT = 0.94553884672
-S_RESCALE = 0.945          # from E2 (C_eff = 0.797); no further tuning
+S_RESCALE = 0.945          # from E2 (C_eff = 0.753 * s = 0.712); no further tuning
 FIT_RANGE = (0.05, 10.0)   # r/r_s window used in Section 3.5
 LEAK_EXCLUDE_RS = 0.2      # phi is read inside this radius; leak check drops it
 

@@ -23,7 +23,7 @@ There is no need to bound it: all three fields are computable on the same
 measurement**, not an inference. This script makes it one.
 
 It also asks whether calibration and validation can be separated at all. The
-single time rescaling s = 0.945 (C_eff = 0.797) was fitted on snapshots 010-045
+single time rescaling s = 0.945 (C_eff = 0.753 * s = 0.712) was fitted on snapshots 010-045
 -- every epoch the comparison then scores. `snapshot_051` is the only other one,
 and it lies past the end of the solver run, which terminates at collapse. So it
 cannot be scored without extrapolating, and **no held-out validation of the
@@ -180,7 +180,7 @@ def main():
     quad_claim = float(np.sqrt(max(rms(ee) ** 2 - rms(ef) ** 2, 0.0)))
     out = {
         'reference': 'Fischer, Yu & Dolag 2025, arXiv:2506.06269, N=5e7',
-        's_rescale': S_RESCALE, 'C_eff': 0.7968253968253968,
+        's_rescale': S_RESCALE, 'C_eff': 0.753 * S_RESCALE,
         'calibration_snapshots': list(CALIBRATION_SNAPSHOTS),
         'emulator_t_norm': t_norm,
         'n_points': int(len(ef)),

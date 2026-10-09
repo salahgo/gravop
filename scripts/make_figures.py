@@ -170,7 +170,7 @@ def fig_nbody():
     # inherits it through the training set rather than carrying a second fit,
     # and saying so on the figure is what separates calibration from
     # validation for a reader who does not reach the text.
-    axes[0].set_title(r'(a) solver, $C_{\rm eff}=0.797$ fitted here'
+    axes[0].set_title(r'(a) solver, $C_{\rm eff}=0.712$ fitted here'
                       '\n     0.020 dex RMS', loc='left', fontsize=8)
     axes[1].set_title(r'(b) emulator only, same $C_{\rm eff}$ inherited'
                       '\n     0.023 dex RMS', loc='left', fontsize=8)

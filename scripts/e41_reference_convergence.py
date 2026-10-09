@@ -48,7 +48,7 @@ CASES = [
 def run(sh, wh, N):
     t0 = time.time()
     r = solver.run_halo(sigma_m=sh, w=wh, model_lmfp='yukawa_tu',
-                        model_smfp='yukawa_tu', C=0.797, n_shells=N,
+                        model_smfp='yukawa_tu', C=0.712, n_shells=N,
                         eps_t=3e-4, rho_c_factor=300.0, t_end=1e5,
                         kn_min=0.02, max_steps=20_000_000, max_snaps=60,
                         timestep_mode='implicit')
@@ -110,7 +110,7 @@ def main():
             'correspondingly LARGE and the fitted C_eff correspondingly LOW. '
             'The shift is the same direction as the censoring bias and, at '
             'about one per cent, is two orders of magnitude smaller than the '
-            'gap between the fitted 0.20 and the isolated run\'s 0.797, so it '
+            'gap between the fitted 0.20 and the isolated run\'s 0.712, so it '
             'does not affect that comparison.'),
         'convergence_is_clean': 'second order in every case, so the error is '
                                 'predictable rather than erratic -- which is '

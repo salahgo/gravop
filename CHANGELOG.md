@@ -29,9 +29,9 @@ accompanies it.
   arms across five systems and three operator backbones, the exact deployed
   error decomposition, and the solver-computable displacement predictor
   scored on reserved parameter draws.
-- An acceptance suite of 228 gates that checks the reported results:
+- An acceptance suite of 229 gates that checks the reported results:
   158 verification gates, which recompute their assertion from the solver,
-  the data or the model code, and 70 regression gates, which check a
+  the data or the model code, and 71 regression gates, which check a
   value against a stored record.
 - Snapshot identity before a DOI exists: each tree carries a
   `MANIFEST.sha256`, whose SHA-256 names the tree, and

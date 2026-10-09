@@ -49,6 +49,16 @@ SIGMA0_CM2G, W_KMS = 147.1, 120.0
 OM, OL, H0_GYR = 0.286, 0.714, 13.968
 
 
+# The isolated N-body run's conductivity. E2 fits a time rescaling s = 0.945
+# with the fluid model compared at t_fluid = s * t_nbody; t scales as 1/C in
+# the long-mean-free-path regime, so the matching constant is C * s =
+# 0.753 * 0.945 = 0.712 (corrected 2026-10-09 from the inverted C / s = 0.797;
+# checked by scoring the fluid model against the N-body snapshots unrescaled:
+# 0.0205 dex at C = 0.712, 0.088 at 0.753, and 0.797 collapses before snapshot
+# 045).
+ISOLATED_C = 0.712
+
+
 def cosmic_time_gyr(a):
     """Flat LCDM age at scale factor a. Same constants as E33."""
     return (2.0 / (3.0 * np.sqrt(OL))) * H0_GYR * np.arcsinh(
@@ -170,7 +180,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--table', default=os.path.join(OUT, 'tc_table.json'))
     ap.add_argument('--c-grid', nargs='*', type=float,
-                    default=[0.2, 0.3, 0.4, 0.6, 0.797, 1.0, 1.2, 1.4, 1.7, 2.0])
+                    default=[0.2, 0.3, 0.4, 0.6, ISOLATED_C, 1.0, 1.2, 1.4, 1.7, 2.0])
     a_ = ap.parse_args()
 
     f, fc, grid, miss, T = load_table(a_.table)
@@ -242,7 +252,7 @@ def main():
             best = rec
 
     # ---- the two pre-registered nulls
-    keep0 = [i for i in usable if phase_of(*series[i][1:6], 0.797, f, fc)]
+    keep0 = [i for i in usable if phase_of(*series[i][1:6], ISOLATED_C, f, fc)]
     phi_o = phi_obs_all[np.array(keep0)]
     out['nulls'] = {
         'constant_median_phase': {
@@ -372,7 +382,7 @@ def main():
         'median': float(np.median(boot)),
         'ci95': [float(np.percentile(boot, 2.5)),
                  float(np.percentile(boot, 97.5))],
-        'frac_at_or_above_isolated_value': float(np.mean(boot >= 0.797)),
+        'frac_at_or_above_isolated_value': float(np.mean(boot >= ISOLATED_C)),
         'grid': list(map(float, a_.c_grid)),
     }
 
@@ -409,7 +419,7 @@ def main():
     }
 
     # the one strong statement the data do support
-    k797 = int(np.argmin(np.abs(np.array(a_.c_grid) - 0.797)))
+    k797 = int(np.argmin(np.abs(np.array(a_.c_grid) - ISOLATED_C)))
     out['isolated_value_comparison'] = {
         'C_eff': float(a_.c_grid[k797]),
         'rms': float(sc[k797]),
@@ -428,7 +438,7 @@ def main():
         'interior': bool(0 < k < len(cs) - 1),
         'beats_constant_null': ss[k] < out['nulls']['constant_median_phase']['score_all'],
         'beats_no_evolution_null': ss[k] < out['nulls']['no_self_interaction']['score_all'],
-        'isolated_run_value': 0.797,
+        'isolated_run_value': ISOLATED_C,
     }
     os.makedirs(OUT, exist_ok=True)
     json.dump(out, open(os.path.join(OUT, 'rate.json'), 'w'), indent=1)

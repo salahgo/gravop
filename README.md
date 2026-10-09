@@ -145,7 +145,7 @@ data, the model code or a checkpoint's own behaviour, so a wrong number stored
 under `results/` cannot make it pass. A regression gate reads a stored summary
 or per-record array under `results/` and checks a quoted value against it or
 recomputes one from it, so it pins consistency rather than correctness. Of the
-228 gates, 158 are verification and 70 regression.
+229 gates, 158 are verification and 71 regression.
 
 External validation:
 
