@@ -74,14 +74,13 @@ def fig_solver_validation():
     from gravop import solver
     res_i = solver.run_halo(sigma_m=0.5, n_shells=150, eps_t=3e-4,
                             rho_c_factor=1e3, timestep_mode='implicit')
-    ax.semilogy(t_e, rc_e / rc_e[0], color=C['ref'],
-                label='explicit (51.2M steps, 500 s)')
+    ax.semilogy(t_e, rc_e / rc_e[0], color=C['ref'], label='explicit')
     ax.semilogy(res_i['t'], res_i['rho'][:, 3] / res_i['rho'][0, 3],
                 ls='--', color=C['gravop'],
-                label='implicit (34k steps, 0.6 s)')
+                label='semi-implicit (this work)')
     ax.set(xlabel=r'$t/t_0$', ylabel=r'$\rho_c/\rho_{c,0}$')
     ax.legend(frameon=False, loc='upper left')
-    ax.set_title(r'(b) $\hat{\sigma}=0.5$: implicit vs explicit', loc='left')
+    ax.set_title(r'(b) $\hat{\sigma}=0.5$', loc='left')
     save(fig, 'fig1_solver_validation')
 
 
@@ -166,15 +165,11 @@ def fig_nbody():
                        label=name)
         ax.legend(handles=[points, curve], frameon=False, loc='upper right',
                   fontsize=7, handlelength=1.6)
-    # The conductivity rescaling is fitted once, against panel (a). Panel (b)
-    # inherits it through the training set rather than carrying a second fit,
-    # and saying so on the figure is what separates calibration from
-    # validation for a reader who does not reach the text.
-    axes[0].set_title(r'(a) solver, $C_{\rm eff}=0.712$ fitted here'
-                      '\n     0.020 dex RMS', loc='left', fontsize=8)
-    axes[1].set_title(r'(b) emulator only, same $C_{\rm eff}$ inherited'
-                      '\n     0.023 dex RMS', loc='left', fontsize=8)
-    fig.subplots_adjust(top=0.82)
+    # The conductivity rescaling is fitted once, against panel (a); panel (b)
+    # inherits it. The caption says so and the text quotes both RMS values, so
+    # the panels carry labels only.
+    axes[0].set_title(r'(a) solver, $C_{\rm eff}=0.712$', loc='left', fontsize=8)
+    axes[1].set_title('(b) emulator', loc='left', fontsize=8)
     save(fig, 'fig2_nbody_validation')
 
 
@@ -258,9 +253,14 @@ def fig_emulator():
 
 
 def fig_posterior():
-    g = np.load(os.path.join(ROOT, 'results', 'e9', 'grid_zoom.npz'))
+    # the extended grid reaches the prior's upper edges, so neither posterior
+    # is truncated by the plotted box; the original 91x91 box clipped both
+    # (scripts/e9_zoom_grid.py)
+    ext = os.path.join(ROOT, 'results', 'e9', 'grid_zoom_extended.npz')
+    g = np.load(ext if os.path.exists(ext) else
+                os.path.join(ROOT, 'results', 'e9', 'grid_zoom.npz'))
     ch = np.load(os.path.join(ROOT, 'results', 'e9', 'samples.npy'))
-    lp = g['logpost'] - g['logpost'].max()
+    lp = g['logpost'] - np.max(g['logpost'][np.isfinite(g['logpost'])])
     P = np.exp(lp)
     P /= P.sum()
 
@@ -288,9 +288,9 @@ def fig_posterior():
     ax.plot([], [], color=C['ref'], label='direct solver (grid)')
     ax.plot([], [], color=C['gravop'], ls='--', label='GravOp + MCMC')
     ax.set(xlabel=r'$\log_{10}\hat\sigma_0$', ylabel=r'$\log_{10}\hat w$',
-           xlim=(-0.1, 0.8), ylim=(-0.6, 1.2))
+           xlim=(g['lsig'][0], g['lsig'][-1]), ylim=(g['lw'][0], g['lw'][-1]))
     ax.legend(frameon=False, loc='upper right')
-    ax.set_title('posterior: 68/95% regions', loc='left')
+    ax.set_title('68/95% regions', loc='left')
     save(fig, 'fig4_posterior')
 
 
@@ -442,7 +442,7 @@ def fig_workprecision():
     # value, so the cap is drawn rather than the points placed
     cap = wp['curves']['classic'][0]['exceeded_cap_s']
     ax.axhspan(cap, cap * 6, color='#e9e9e6', zorder=0)
-    ax.text(2.6e-3, cap * 2.3, 'wall cap: two explicit runs stopped here',
+    ax.text(2.6e-3, cap * 2.3, f'{cap:.0f} s cap',
             fontsize=7, color='#555550', va='center', ha='left')
 
     for curve, hue, label in (('implicit', C['gravop'],
@@ -463,8 +463,10 @@ def fig_workprecision():
     for y in (lo, hi):
         ax.plot([target], [y], 'o', ms=6, mfc='white', mec='#333330',
                 mew=1.5, zorder=5)
-    ax.text(target, 700, r'matched accuracy $3\times10^{-4}$',
-            fontsize=7.5, color='#555550', ha='center', va='bottom')
+    # beside the vertical rather than across it (the x axis is inverted, so
+    # a smaller value sits further right)
+    ax.text(target * 0.92, 700, 'matched accuracy',
+            fontsize=7.5, color='#555550', ha='left', va='bottom')
 
     ax.set_xscale('log')
     ax.set_yscale('log')

@@ -41,6 +41,9 @@ failed counts, the normalised-time grid and generation times are recorded in
 | Fischer, Yu & Dolag (2025), isolated-halo SIDM core-collapse run, A&A, arXiv:2506.06269 | free use with citation, per darkium.org; not redistributed | N-body validation of the solver and emulator |
 | Mace et al. (2025), Phys. Rev. D, arXiv:2504.13004 | published formula only | multi-configuration check of the collapse-time calibration |
 | SIDM Concerto, Nadler et al., ApJ 991, 69 (2025), arXiv:2503.10748; data release doi:10.5281/zenodo.14933624 | CC-BY; not redistributed | structural comparison against a cosmological suite |
+| NSphere (Kamionkowski & Sigurdson 2025, arXiv:2504.13996; SIDM physics in Kamionkowski, Sigurdson & Slone, PRL 136, 201001, 2026), github.com/kris-sigurdson/NSphere at commit 8f14666 | Apache-2.0; cloned separately, not vendored; built with clang in an Ubuntu 24.04 container (`scripts/nsphere_reference_runs.py`) | kinetic particle references for haloes B, C, D1 and D2 (`scripts/nsphere_reference_runs.py`, `experiments/research_extensions/scripts/nsphere_ext.py`; every run's command in its `run.json`) |
+| Zhong, Yang & Yu (2023), MNRAS 526, 758, Table 3 | published values only | verification of the baryonic module's collapse times |
+| van den Bosch & Tokayer (2026), MNRAS, doi:10.1093/mnras/stag2015 | published calibration only: alpha = 1/2, beta = 0.9 for NFW haloes | the literature conductivity closure compared in Section 6.4 (`gravop.closure.LITERATURE`) |
 
 ### Fischer, Yu & Dolag (2025)
 

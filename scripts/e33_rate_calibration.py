@@ -182,14 +182,14 @@ def main():
            'n_haloes_scored_at_every_c_eff': len(common),
            'scoring_note': ('median taken over the haloes admissible at EVERY '
                             'grid point, so the sample does not change with C_eff'),
-           'fischer_c_eff': 0.797,
+           'fischer_c_eff': 0.712,   # C * s; 0.797 (= C / s) until 2026-10-15
            'best_c_eff': best,
            'at_grid_edge': bool(best in (grid[0], grid[-1])) if best else None,
            'per_halo': {str(i): v for i, v in rows.items()}}
     os.makedirs(args.out, exist_ok=True)
     json.dump(out, open(os.path.join(args.out, 'rate_calibration.json'), 'w'),
               indent=2)
-    print('best C_eff:', best, '| Fischer 0.797 |',
+    print('best C_eff:', best, '| Fischer 0.712 |',
           'AT GRID EDGE - treat as a bound, not a calibration' if out['at_grid_edge']
           else 'interior minimum')
 

@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "gravop"
-version = "1.0.0"
-description = "Conditioning-coordinate benchmarks for neural PDE surrogates, with a gravothermal self-interacting dark matter solver and emulator"
+version = "1.2.0"
+description = "Fast gravothermal evolution of self-interacting dark matter haloes: semi-implicit solver, kinetically tested conductivity closure and neural emulator, with the statecond benchmark of conditioning coordinates for neural PDE surrogates"
 readme = "README.md"
 requires-python = ">=3.10"
 license = {text = "GPL-3.0-or-later"}

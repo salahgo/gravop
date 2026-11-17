@@ -9,10 +9,14 @@ operator actually is, how the programs fit together, and what the mechanism
 claims. CPC asks for EPS, so these are written as EPS (and PDF, so the
 pdflatex build picks a vector file without an epstopdf pass).
 
-NO NUMBER IS TYPED HERE. Parameter counts are obtained by instantiating the
-network; deployment requirements are read from `arm_contract.json`; the
-mechanism panel is read from `coord_floor.json`. If an experiment moves, these
+NO NUMBER IS TYPED HERE. Deployment requirements are read from
+`arm_contract.json`, the mechanism panel from `coord_floor.json` and the
+deployed-to-oracle range from `timehead.json`. If an experiment moves, these
 figures move with it, which is the same rule the plotted figures follow.
+
+The figures carry labels and short annotations, not sentences: what a
+sentence would say (the parameter difference between the arms, the median
+ratio of panel c) is stated in the manuscript text.
 
 Palette: arm identity is carried by hue and is CONSISTENT with fig8-fig13 --
 time-conditioned arms in the orange already used for them, the state-conditioned
@@ -139,15 +143,6 @@ def fig_architecture(outdirs):
     Line art on white: square rules, no fills, no shadow cards. Stage names are
     the operations they perform, not abbreviations.
     """
-    sys.path.insert(0, os.path.join(ROOT, 'src'))
-    from statecond.model import BACKBONES
-    n_par = {}
-    for extra in (1, 2):
-        net = BACKBONES['fno'](n_fields=1, n_par=4, cond_extra=extra,
-                               n_x=128)
-        n_par[extra] = sum(p.numel() for p in net.parameters())
-    delta = n_par[2] - n_par[1]
-
     fig, ax = plt.subplots(figsize=(FS.COL2, 2.05))
     ax.set_xlim(0, 1); ax.set_ylim(0.02, 1.0); ax.axis('off')
 
@@ -201,11 +196,6 @@ def fig_architecture(outdirs):
                 arrowprops=dict(arrowstyle='-|>', color=INK, lw=0.6,
                                 shrinkA=0, shrinkB=0))
 
-    ax.text(0.640, ycond, 'time arms supply one scalar, the state arm two;',
-            fontsize=7.2, va='center', color=INK)
-    ax.text(0.640, ycond - 0.105,
-            f'the difference is {delta} of {n_par[2]:,} parameters',
-            fontsize=7.2, va='center', color=INK)
     save(fig, 'fig15_architecture', outdirs)
 
 
@@ -311,7 +301,7 @@ def fig_coordinate_displacement(outdirs):
     ax.set_xticks([]); ax.set_yticks([])
     ax.set_ylim(0.05, 1.02)
 
-    # (c) the test: predicted against measured, 25 points, no network
+    # (c) the test: predicted against measured, one point per system and noise
     ax = axes[2]
     ax.set_title('c  predicted against measured', fontsize=8.5,
                  loc='left')
@@ -327,11 +317,7 @@ def fig_coordinate_displacement(outdirs):
     ax.set_xscale('log'); ax.set_yscale('log')
     ax.set_xlim(2e-3, 0.45); ax.set_ylim(2e-3, 0.45)
     ax.set_xlabel('measured nRMSE', fontsize=8)
-    ax.set_ylabel('predicted from the solver', fontsize=8)
-    med = cf['_summary']['median_ratio']
-    ax.text(0.045, 0.93, f'median ratio {med:.3f}\n25 points, no network',
-            transform=ax.transAxes, fontsize=7.4, va='top', color=INK,
-            linespacing=1.5)
+    ax.set_ylabel('predicted nRMSE', fontsize=8)
     ax.legend(frameon=False, fontsize=FS.MINPT, loc='lower right',
               handlelength=1.1, borderpad=0.2, labelspacing=0.25)
     for a in axes:
@@ -376,10 +362,9 @@ def fig_deployment_gap(outdirs):
 
     SHARED = FS.tint(INK, 0.05)          # the components both paths share
     rows = (
-        (y_top, r'exact $t_{\rm sing}$', 'reported', RULE,
-         'available only under benchmark conditions'),
+        (y_top, r'exact $t_{\rm sing}$', 'reported', RULE, 'benchmark only'),
         (y_bot, r'predicted $\hat{t}_{\rm sing}$', 'obtained in use', TAU_HUE,
-         'coordinate error originates here'),
+         'clock error enters'),
     )
     for y, src, tag, hue, note in rows:
         yc = y + H / 2
@@ -410,7 +395,7 @@ def fig_deployment_gap(outdirs):
     ym = (y_top + y_bot) / 2 + H / 2
     ax.text(xb + 0.018, ym + 0.040, f'{lo:.2f}–{hi:.2f}', fontsize=9.5,
             va='center', color=INK)
-    ax.text(xb + 0.018, ym - 0.048, 'ratio of the two', fontsize=FS.MINPT,
+    ax.text(xb + 0.018, ym - 0.048, 'deployed / oracle', fontsize=FS.MINPT,
             va='center', color=MUTED)
     save(fig, 'fig18_deployment_gap', outdirs)
 

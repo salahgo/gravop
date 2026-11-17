@@ -210,3 +210,26 @@ def test_the_archive_digest_does_not_depend_on_the_clock():
         'the citation file changes with the system date, so the archive digest '
         'is not a stable name for the snapshot')
     assert meta['date_released'] in first
+
+
+def _pyproject_version(root):
+    text = open(os.path.join(root, 'pyproject.toml'), encoding='utf-8').read()
+    return re.search(r'^version\s*=\s*"([^"]+)"', text, re.M).group(1)
+
+
+@pytest.mark.regression
+def test_package_version_matches_release():
+    """pyproject.toml carries the release version.
+
+    The release version lives in release.json in the development tree and in
+    CITATION.cff in the source release. `gravop.__version__` is not compared:
+    src/gravop/__init__.py is hash-pinned by the population study's frozen
+    configuration and cannot change until that study finishes.
+    """
+    rel = os.path.join(ROOT, 'release.json')
+    if os.path.exists(rel):
+        version = json.load(open(rel))['version']
+    else:
+        cff = open(os.path.join(ROOT, 'CITATION.cff'), encoding='utf-8').read()
+        version = re.search(r'^version:\s*"([^"]+)"', cff, re.M).group(1)
+    assert _pyproject_version(ROOT) == version

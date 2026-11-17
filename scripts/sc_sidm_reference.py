@@ -108,6 +108,40 @@ def t_c_at_radius(res, r_ref, factor):
     return float(t0 + (t1 - t0) * (target - l0) / (l1 - l0))
 
 
+def mid_mass(res):
+    """Mass coordinate of each shell's centre: shell i holds (m[i-1], m[i]]."""
+    m = np.asarray(res['m'])
+    return 0.5 * (np.r_[0.0, m[:-1]] + m)
+
+
+def t_c_at_mass(res, m_ref, factor):
+    """Collapse time at a FIXED ENCLOSED MASS (added 2026-10-15).
+
+    `t_c_at_radius` never fires: the collapsing core contracts inside any fixed
+    radius, so the density there does not reach `factor` times its initial
+    value even when the solver's own criterion does (0 usable trajectories of
+    96 draws with the radius criterion). The solver's criterion is a fixed
+    Lagrangian shell, i.e. a fixed enclosed mass on a given grid, so the
+    grid-independent version of it is the density at a fixed mass coordinate:
+    log density is interpolated in log mass at `m_ref`, anchored to the
+    production grid's shell 3, where it reproduces the solver's criterion.
+    """
+    lm = np.log10(mid_mass(res))
+    lr = np.log10(m_ref)
+    rc = np.array([np.interp(lr, lm, np.log10(res['rho'][i]))
+                   for i in range(len(res['t']))])
+    target = rc[0] + np.log10(factor)
+    hit = np.nonzero(rc >= target - 1e-12)[0]
+    if hit.size == 0 or hit[0] == 0:
+        return None
+    j = int(hit[0])
+    t0, t1 = res['t'][j - 1], res['t'][j]
+    l0, l1 = rc[j - 1], rc[j]
+    if l1 == l0:
+        return float(t1)
+    return float(t0 + (t1 - t0) * (target - l0) / (l1 - l0))
+
+
 def field_dex(a, b):
     """RMS log10 density disagreement at matched normalised time.
 
@@ -137,6 +171,11 @@ def main():
     ap.add_argument('--eps-tol', type=float, default=1e-4,
                     help='tolerance-refinement check at the production grid')
     ap.add_argument('--seed', type=int, default=20260906)
+    ap.add_argument('--criterion', choices=('mass', 'radius'), default='mass',
+                    help='where the density criterion is evaluated; radius '
+                         'is kept for the record and never fires')
+    ap.add_argument('--max-attempts', type=int, default=None,
+                    help='draws to try (default 4 n)')
     args = ap.parse_args()
 
     grids = sorted(args.grids)
@@ -144,12 +183,30 @@ def main():
     rng = np.random.default_rng(args.seed)
     rows, t0 = [], time.time()
     attempted = 0
-    while len(rows) < args.n and attempted < 4 * args.n:
+    max_attempts = args.max_attempts or 4 * args.n
+    n_not_density = 0
+    while len(rows) < args.n and attempted < max_attempts:
         attempted += 1
         d, ic, rc = draw_params(rng, 'train')
         runs = {}
+        rp = run_at(d, ic, rc, prod, args.eps_t)
+        if rp is None:
+            continue
+        # anchor the criterion to the production grid's shell 3, so it means
+        # what it has always meant, evaluated identically on every grid
+        if args.criterion == 'mass':
+            ref = float(mid_mass(rp)[3])
+            crit = t_c_at_mass
+        else:
+            ref = float(rp['r'][0][3])
+            crit = t_c_at_radius
+        if crit(rp, ref, SOLVER_KW['rho_c_factor']) is None:
+            # ended on the Knudsen floor or the horizon: no density event
+            n_not_density += 1
+            continue
+        runs[prod] = rp
         ok = True
-        for g in grids:
+        for g in grids[1:]:
             r = run_at(d, ic, rc, g, args.eps_t)
             if r is None:
                 ok = False
@@ -160,17 +217,15 @@ def main():
         rtol = run_at(d, ic, rc, prod, args.eps_tol)
         if rtol is None:
             continue
-        # anchor the radius to the production grid's shell 3 at t = 0, so the
-        # criterion means what it has always meant, evaluated identically on
-        # every grid
-        r_ref = float(runs[prod]['r'][0][3])
+        r_ref = ref
         tc = {}
         for g in grids:
-            v = t_c_at_radius(runs[g], r_ref, SOLVER_KW['rho_c_factor'])
+            v = crit(runs[g], ref, SOLVER_KW['rho_c_factor'])
             if v is None:
                 tc = None
                 break
             tc[g] = v
+            runs[g]['t_c'] = v
         if tc is None:
             continue
         # the shell-index definition, for comparison only
@@ -179,7 +234,8 @@ def main():
             'params': {k: (float(v) if isinstance(v, (int, float)) else v)
                        for k, v in d.items()},
             'ic': ic, 'rc': float(rc or 0.0),
-            'r_ref': r_ref,
+            'criterion': args.criterion,
+            'reference_coordinate': r_ref,
             't_c': tc,
             't_c_shell_index_definition': tc_shell,
             'rel_dt_sing_shell_definition':
@@ -188,8 +244,7 @@ def main():
             # is computed from
             'rel_dt_sing': abs(tc[prod] - tc[grids[-1]]) / tc[grids[-1]],
             'rel_dt_tol': _safe_rel(
-                tc[prod], t_c_at_radius(rtol, r_ref,
-                                        SOLVER_KW['rho_c_factor'])),
+                tc[prod], crit(rtol, ref, SOLVER_KW['rho_c_factor'])),
             'field_dex': field_dex(runs[prod], runs[grids[-1]]),
         }
         if len(grids) >= 3:
@@ -221,6 +276,10 @@ def main():
     rec = {
         'n_trajectories': len(rows),
         'n_attempted': attempted,
+        'n_without_density_event': n_not_density,
+        'criterion': args.criterion,
+        'scope': ('runs that end on the density criterion; Knudsen-floor and '
+                  'horizon terminations have no density event to converge'),
         'grids': grids,
         'production_grid': prod,
         'reference_grid': grids[-1],

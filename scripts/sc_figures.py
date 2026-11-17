@@ -148,8 +148,7 @@ def fig_decomposition():
     ax.set_yticks(y)
     ax.set_yticklabels([k.replace('_', '  ') for k in keys])
     ax.set_ylim(len(keys) - 0.5, -1.3)
-    ax.set_xlabel(r'share of the measured $E_{\rm dep}^2$'
-                  '  (the three sum to one)')
+    ax.set_xlabel(r'share of measured $E_{\rm dep}^2$')
     ax.legend(ncol=3, fontsize=FS.MINPT, loc='upper center',
               bbox_to_anchor=(0.5, 1.09))
     ax.grid(axis='y', visible=False)

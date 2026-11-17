@@ -9,7 +9,7 @@ documentation and acceptance suite. The archival record on Zenodo holds
 
 ```bash
 pip install -e ".[all]"
-unzip /path/to/archival-record.zip 'results/*'   # results/ at the root of this checkout
+unzip /path/to/archival-record.zip 'results/*' 'experiments/*' 'data/*'   # at the root of this checkout
 python scripts/reproduce.py verify --execute
 ```
 
@@ -32,6 +32,13 @@ failed commands return nonzero.
 | `forecast-results` | Audits of the application forecasting studies; needs the local datasets and checkpoints |
 | `final-validation` | The frozen diagnostic prerequisites of the population study, failures retained |
 | `fresh-confirmation` | The frozen continuous-prior population study; refuses to run until all six diagnostics pass |
+| `transfer` | The disjoint-system transfer study of the penalty predictor (`docs/DISJOINT_PREREGISTRATION.md`): six new equations generated, trained under the unchanged recipe, decomposed and scored against the frozen criteria; retrains six operator suites and their clocks on one GPU |
+| `baryons` | Verification of the static-baryon module against published collapse times, the controlled cases on the calibration halo, the 1200-trajectory baryonic dataset, three baryon-aware emulator members and their evaluation with the production ensemble; one GPU |
+| `independent_haloes` | The NSphere reference runs for haloes B and C (built separately, see `DATA.md`), the fluid model at the halo-A calibration, the production emulator zero-shot and their comparison; the particle runs dominate the cost |
+| `closure_test` | The conductivity-closure test of the manuscript from the archived particle measurements and fluid grids: ladders, scores of the pre-registered haloes D1, D2, E1, E2, the halo B half-step control, the five- and seven-halo fits, robustness, the matched-marker refit, the three closure-test figures and the closure tests; CPU, minutes |
+| `uncertainty` | The clock-error propagation, coverage events, end-to-end gate and Figure of Section 6 from the archived baryon-aware members and dataset; one GPU, minutes |
+| `closure_fit7_emulator` | The production dataset regenerated under the recommended seven-halo closure, five members retrained and evaluated; one GPU (the members are archived, so this target is needed only to rebuild them) |
+| `closure` | The three-closure transfer study on haloes A, B and C, the production dataset regenerated under the literature closure, five emulator members retrained on it with the production recipe, and their evaluation; one GPU |
 | `gpu-results` | Recomputes the evaluated GPU solver prototype's accuracy and throughput decision from local arrays; needs no GPU |
 
 `methods` retrains and writes research outputs. Run it only in a separate
@@ -84,6 +91,41 @@ the N-body comparison, the emulator examples and the posterior — also read
 per-run arrays and emulator weights that the archive does not carry, and are
 rebuilt with the expensive tier below.
 
+## The conductivity-closure test
+
+Everything in the closure test re-runs from the archive record without new
+simulations. From the checkout root, with the record's `results/` and
+`experiments/` unpacked:
+
+```bash
+python experiments/research_extensions/scripts/score_D.py           # frozen predictions against the particle runs
+python experiments/research_extensions/scripts/closure_fit5.py      # five-halo fit, leave-one-out (seconds)
+python experiments/research_extensions/scripts/closure_robustness.py
+python experiments/research_extensions/scripts/score_E.py           # family E against its frozen predictions; halo B half time step
+python experiments/research_extensions/scripts/closure_fit7.py      # seven-halo fit (post hoc), from the stored fluid grid
+python experiments/research_extensions/scripts/marker_refit.py      # matched-marker refit (reads closure_scan_traj.npz; runs the D grid, minutes)
+python scripts/fig_closure_test.py
+python scripts/fig_closure_calibration.py
+python scripts/fig_closure_structure.py                             # reruns 12 fluid trajectories (~1 min)
+python -m pytest experiments/research_extensions/tests -q
+```
+
+The particle runs themselves need NSphere at commit `8f14666` (not
+redistributed) and a few hundred thread-hours in total; each run's exact command, seed and
+step count are in its `run.json`, and
+`experiments/research_extensions/README.md` lists every stage. The
+pre-registration and its timing are described in
+`docs/CLOSURE_TEST_PREREGISTRATION.md`. The clock-error propagation study
+(`experiments/research_extensions/scripts/clock_uq.py`,
+`scripts/fig_clock_uq.py`), the end-to-end gate (`gate_e2e.py`) and the
+coverage-event study (`clock_uq_events.py`) read the three baryon-aware
+members and their dataset, both archived; on one GPU they replay the archived
+records exactly, apart from the measured emulator time and the cost ratios
+derived from it (`python scripts/reproduce.py uncertainty --execute`). `energy_drift.py` reads the raw NSphere energy dumps,
+which are not archived; its record `closure_design/energy_drift.json` is.
+The same sequence, with the figures and tests, is the `closure_test` target:
+`python scripts/reproduce.py closure_test --execute`.
+
 ## Rebuilding from scratch
 
 The five HDF5 benchmark sets under `data/sc/` are needed by the `methods`
@@ -110,7 +152,13 @@ unexpected failures and returns nonzero.
 ## What is not archived, and why
 
 - **Trained weights.** The application ensemble, the benchmark checkpoints
-  and the forecasting models, about 2 GB in all. Each training run's full
+  and the forecasting models, about 2 GB in all. The exception is the
+  five-member emulator retrained on the recommended seven-halo closure,
+  which is archived (`results/closure_fit7_20261113/runs/*/model.pt`, about
+  4.6 MB each) because it is the ensemble released for new work, and the
+  three baryon-aware members with their 60 MB dataset
+  (`results/baryons_20261107/runs/seed*/model.pt`, `data/baryons/train.h5`),
+  which the uncertainty studies read. Each training run's full
   argument record and seed are archived (`results/runs/*/metrics.json`,
   `results/statecond/<system>_<architecture>.json`); the forecasting studies
   also record the SHA-256 of every model they load (for example
@@ -121,13 +169,18 @@ unexpected failures and returns nonzero.
   checkable without them.
 - **Trajectory ensembles.** Regenerated from the released generators with the
   recorded seeds; the generation records are in the HDF5 attributes and in
-  `data/sc/manifest.json`.
-- **Intermediate solver state.** Per-run arrays that no table reads. Three
+  `data/sc/manifest.json`, which also records a content digest of each
+  reference set (every dataset except the per-run wall times). Regenerate into
+  a separate directory with `scripts/sc_gen.py --outdir DIR` and compare with
+  `python scripts/sc_data_digest.py --check DIR`.
+- **Intermediate solver state.** Per-run arrays that no table reads. Four
   per-record arrays are archived because a published claim is checked against
   them by hand: `results/statecond/conformal_deployed_records.npz` (coverage
   and gate decisions per trajectory), `results/e32/controls.npz` (the per-halo
-  catalogue with its cosmological identities) and `results/e31/trajectories.npz`
-  (the matched pairs it was built from).
+  catalogue with its cosmological identities), `results/e31/trajectories.npz`
+  (the matched pairs it was built from) and `results/e9/grid_zoom_extended.npz`
+  (the solver-grid posterior of Figure 4, about nine core-hours to regenerate
+  with `scripts/e9_zoom_grid.py`).
 - **The population study's working state.** The fresh-confirmation run is
   still executing. Its frozen specification — configuration, generation
   record, overlap check, temporal truth — is archived; its per-case state is

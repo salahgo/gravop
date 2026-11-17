@@ -1,0 +1,201 @@
+{
+ "haloes": {
+  "D1": {
+   "mass": 10000000000.0,
+   "rs": 3.0,
+   "falloff": 6.0,
+   "kappa": 200.2373
+  },
+  "D2": {
+   "mass": 10000000000.0,
+   "rs": 3.0,
+   "falloff": 6.0,
+   "kappa": 113.4404
+  },
+  "E1": {
+   "mass": 10000000000.0,
+   "rs": 3.0,
+   "falloff": 19.0,
+   "kappa": 213.3145
+  },
+  "E2": {
+   "mass": 10000000000.0,
+   "rs": 3.0,
+   "falloff": 10.0,
+   "kappa": 363.8206
+  }
+ },
+ "runs": {
+  "D1_s21": {
+   "group": "closure_design",
+   "halo": "D1",
+   "n": 100000,
+   "seed": 21,
+   "tfinal": 120,
+   "dtwrite": 2727,
+   "steps": 1363501
+  },
+  "D1_s22": {
+   "group": "closure_design",
+   "halo": "D1",
+   "n": 100000,
+   "seed": 22,
+   "tfinal": 120,
+   "dtwrite": 2727,
+   "steps": 1363501
+  },
+  "D1_s23": {
+   "group": "closure_design",
+   "halo": "D1",
+   "n": 100000,
+   "seed": 23,
+   "tfinal": 120,
+   "dtwrite": 2727,
+   "steps": 1363501
+  },
+  "D1_N2e5_s24": {
+   "group": "closure_design",
+   "halo": "D1",
+   "n": 200000,
+   "seed": 24,
+   "tfinal": 120,
+   "dtwrite": 2727,
+   "steps": 1363501
+  },
+  "D1_N2e5_s25": {
+   "group": "closure_design",
+   "halo": "D1",
+   "n": 200000,
+   "seed": 25,
+   "tfinal": 120,
+   "dtwrite": 2727,
+   "steps": 1363501
+  },
+  "D1_dt2_s21": {
+   "group": "closure_design",
+   "halo": "D1",
+   "n": 100000,
+   "seed": 21,
+   "tfinal": 120,
+   "dtwrite": 5454,
+   "steps": 2727001
+  },
+  "D2_s21": {
+   "group": "closure_design",
+   "halo": "D2",
+   "n": 100000,
+   "seed": 21,
+   "tfinal": 150,
+   "dtwrite": 3409,
+   "steps": 1704501
+  },
+  "D2_s22": {
+   "group": "closure_design",
+   "halo": "D2",
+   "n": 100000,
+   "seed": 22,
+   "tfinal": 150,
+   "dtwrite": 3409,
+   "steps": 1704501
+  },
+  "D2_s23": {
+   "group": "closure_design",
+   "halo": "D2",
+   "n": 100000,
+   "seed": 23,
+   "tfinal": 150,
+   "dtwrite": 3409,
+   "steps": 1704501
+  },
+  "D2_N2e5_s24": {
+   "group": "closure_design",
+   "halo": "D2",
+   "n": 200000,
+   "seed": 24,
+   "tfinal": 150,
+   "dtwrite": 3409,
+   "steps": 1704501
+  },
+  "D2_N2e5_s25": {
+   "group": "closure_design",
+   "halo": "D2",
+   "n": 200000,
+   "seed": 25,
+   "tfinal": 150,
+   "dtwrite": 3409,
+   "steps": 1704501
+  },
+  "D2_dt2_s21": {
+   "group": "closure_design",
+   "halo": "D2",
+   "n": 100000,
+   "seed": 21,
+   "tfinal": 150,
+   "dtwrite": 6818,
+   "steps": 3409001
+  },
+  "E1_s31": {
+   "group": "closure_design",
+   "halo": "E1",
+   "n": 100000,
+   "seed": 31,
+   "tfinal": 280,
+   "dtwrite": 6364,
+   "steps": 3182001
+  },
+  "E1_s32": {
+   "group": "closure_design",
+   "halo": "E1",
+   "n": 100000,
+   "seed": 32,
+   "tfinal": 280,
+   "dtwrite": 6364,
+   "steps": 3182001
+  },
+  "E1_s33": {
+   "group": "closure_design",
+   "halo": "E1",
+   "n": 100000,
+   "seed": 33,
+   "tfinal": 280,
+   "dtwrite": 6364,
+   "steps": 3182001
+  },
+  "E2_s31": {
+   "group": "closure_design",
+   "halo": "E2",
+   "n": 100000,
+   "seed": 31,
+   "tfinal": 150,
+   "dtwrite": 3409,
+   "steps": 1704501
+  },
+  "E2_s32": {
+   "group": "closure_design",
+   "halo": "E2",
+   "n": 100000,
+   "seed": 32,
+   "tfinal": 150,
+   "dtwrite": 3409,
+   "steps": 1704501
+  },
+  "E2_s33": {
+   "group": "closure_design",
+   "halo": "E2",
+   "n": 100000,
+   "seed": 33,
+   "tfinal": 150,
+   "dtwrite": 3409,
+   "steps": 1704501
+  },
+  "B_dt2_s1": {
+   "group": "multifidelity",
+   "halo": "B",
+   "n": 100000,
+   "seed": 1,
+   "tfinal": 850,
+   "dtwrite": 38636,
+   "steps": 19318001
+  }
+ }
+}

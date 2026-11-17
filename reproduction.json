@@ -171,6 +171,1109 @@
           ]
         }
       ]
+    },
+    "transfer": {
+      "steps": [
+        {
+          "command": [
+            "{python}",
+            "scripts/d1_campaign.py",
+            "validate",
+            "--out",
+            "results/track_b_20261106/tasks/validate",
+            "--device",
+            "cuda:0"
+          ],
+          "requires": [
+            "results/statecond/decomposition.json",
+            "results/statecond/ckpt"
+          ],
+          "produces": [
+            "results/track_b_20261106/tasks/validate/summary.json"
+          ]
+        },
+        {
+          "command": [
+            "{python}",
+            "scripts/d1_campaign.py",
+            "generate",
+            "--out",
+            "results/track_b_20261106/tasks/generate",
+            "--workers",
+            "6"
+          ],
+          "requires": [],
+          "produces": [
+            "results/track_b_20261106/tasks/generate/summary.json"
+          ]
+        },
+        {
+          "command": [
+            "{python}",
+            "scripts/d1_campaign.py",
+            "system",
+            "--system",
+            "quench",
+            "--out",
+            "results/track_b_20261106/tasks/system_quench",
+            "--device",
+            "cuda:0"
+          ],
+          "requires": [
+            "results/track_b_20261106/tasks/generate/summary.json"
+          ],
+          "produces": [
+            "results/track_b_20261106/tasks/system_quench/summary.json"
+          ]
+        },
+        {
+          "command": [
+            "{python}",
+            "scripts/d1_campaign.py",
+            "system",
+            "--system",
+            "pme",
+            "--out",
+            "results/track_b_20261106/tasks/system_pme",
+            "--device",
+            "cuda:0"
+          ],
+          "requires": [
+            "results/track_b_20261106/tasks/generate/summary.json"
+          ],
+          "produces": [
+            "results/track_b_20261106/tasks/system_pme/summary.json"
+          ]
+        },
+        {
+          "command": [
+            "{python}",
+            "scripts/d1_campaign.py",
+            "system",
+            "--system",
+            "cgl",
+            "--out",
+            "results/track_b_20261106/tasks/system_cgl",
+            "--device",
+            "cuda:0"
+          ],
+          "requires": [
+            "results/track_b_20261106/tasks/generate/summary.json"
+          ],
+          "produces": [
+            "results/track_b_20261106/tasks/system_cgl/summary.json"
+          ]
+        },
+        {
+          "command": [
+            "{python}",
+            "scripts/d1_campaign.py",
+            "system",
+            "--system",
+            "hj",
+            "--out",
+            "results/track_b_20261106/tasks/system_hj",
+            "--device",
+            "cuda:0"
+          ],
+          "requires": [
+            "results/track_b_20261106/tasks/generate/summary.json"
+          ],
+          "produces": [
+            "results/track_b_20261106/tasks/system_hj/summary.json"
+          ]
+        },
+        {
+          "command": [
+            "{python}",
+            "scripts/d1_campaign.py",
+            "system",
+            "--system",
+            "corr",
+            "--out",
+            "results/track_b_20261106/tasks/system_corr",
+            "--device",
+            "cuda:0"
+          ],
+          "requires": [
+            "results/track_b_20261106/tasks/generate/summary.json"
+          ],
+          "produces": [
+            "results/track_b_20261106/tasks/system_corr/summary.json"
+          ]
+        },
+        {
+          "command": [
+            "{python}",
+            "scripts/d1_campaign.py",
+            "system",
+            "--system",
+            "bimodal",
+            "--out",
+            "results/track_b_20261106/tasks/system_bimodal",
+            "--device",
+            "cuda:0"
+          ],
+          "requires": [
+            "results/track_b_20261106/tasks/generate/summary.json"
+          ],
+          "produces": [
+            "results/track_b_20261106/tasks/system_bimodal/summary.json"
+          ]
+        },
+        {
+          "command": [
+            "{python}",
+            "scripts/d1_campaign.py",
+            "score",
+            "--out",
+            "results/track_b_20261106/tasks/score"
+          ],
+          "requires": [
+            "results/track_b_20261106/tasks/system_quench/summary.json",
+            "results/track_b_20261106/tasks/system_pme/summary.json",
+            "results/track_b_20261106/tasks/system_cgl/summary.json",
+            "results/track_b_20261106/tasks/system_hj/summary.json",
+            "results/track_b_20261106/tasks/system_corr/summary.json",
+            "results/track_b_20261106/tasks/system_bimodal/summary.json"
+          ],
+          "produces": [
+            "results/track_b_20261106/tasks/score/track_b.json"
+          ]
+        }
+      ]
+    },
+    "baryons": {
+      "steps": [
+        {
+          "command": [
+            "{python}",
+            "scripts/baryon_verification.py"
+          ],
+          "requires": [],
+          "produces": [
+            "results/baryons_20261107/verification.json"
+          ]
+        },
+        {
+          "command": [
+            "{python}",
+            "scripts/baryon_cases.py"
+          ],
+          "requires": [],
+          "produces": [
+            "results/baryons_20261107/cases.json"
+          ]
+        },
+        {
+          "command": [
+            "{python}",
+            "scripts/gen_baryon_dataset.py",
+            "1200",
+            "--workers",
+            "6"
+          ],
+          "requires": [],
+          "produces": [
+            "data/baryons/train.h5"
+          ]
+        },
+        {
+          "command": [
+            "{python}",
+            "scripts/train_baryon_emulator.py",
+            "train",
+            "--seed",
+            "0",
+            "--device",
+            "cuda:0"
+          ],
+          "requires": [
+            "data/baryons/train.h5"
+          ],
+          "produces": [
+            "results/baryons_20261107/runs/seed0/model.pt"
+          ]
+        },
+        {
+          "command": [
+            "{python}",
+            "scripts/train_baryon_emulator.py",
+            "train",
+            "--seed",
+            "1",
+            "--device",
+            "cuda:0"
+          ],
+          "requires": [
+            "data/baryons/train.h5"
+          ],
+          "produces": [
+            "results/baryons_20261107/runs/seed1/model.pt"
+          ]
+        },
+        {
+          "command": [
+            "{python}",
+            "scripts/train_baryon_emulator.py",
+            "train",
+            "--seed",
+            "2",
+            "--device",
+            "cuda:0"
+          ],
+          "requires": [
+            "data/baryons/train.h5"
+          ],
+          "produces": [
+            "results/baryons_20261107/runs/seed2/model.pt"
+          ]
+        },
+        {
+          "command": [
+            "{python}",
+            "scripts/train_baryon_emulator.py",
+            "evaluate",
+            "--device",
+            "cuda:0"
+          ],
+          "requires": [
+            "results/baryons_20261107/runs/seed2/model.pt",
+            "results/runs/gravop_s0"
+          ],
+          "produces": [
+            "results/baryons_20261107/emulator.json"
+          ]
+        },
+        {
+          "command": [
+            "{python}",
+            "scripts/fig_baryons.py",
+            "predict"
+          ],
+          "requires": [
+            "results/baryons_20261107/runs/seed2/model.pt"
+          ],
+          "produces": [
+            "results/baryons_20261107/cases_emulator.npz"
+          ]
+        },
+        {
+          "command": [
+            "{python}",
+            "scripts/fig_baryons.py",
+            "plot"
+          ],
+          "requires": [
+            "results/baryons_20261107/cases_emulator.npz",
+            "results/baryons_20261107/cases.json"
+          ],
+          "produces": [
+            "results/figures/fig24_baryons.pdf"
+          ]
+        }
+      ]
+    },
+    "independent_haloes": {
+      "steps": [
+        {
+          "command": [
+            "{python}",
+            "scripts/nsphere_reference_runs.py",
+            "launch",
+            "B1",
+            "--threads",
+            "6"
+          ],
+          "requires": [
+            "data/ref_nsphere/nsphere"
+          ],
+          "produces": [
+            "results/independent_halo_20261107/nsphere/B1/run.json"
+          ]
+        },
+        {
+          "command": [
+            "{python}",
+            "scripts/nsphere_reference_runs.py",
+            "launch",
+            "B2",
+            "--threads",
+            "6"
+          ],
+          "requires": [
+            "data/ref_nsphere/nsphere"
+          ],
+          "produces": [
+            "results/independent_halo_20261107/nsphere/B2/run.json"
+          ]
+        },
+        {
+          "command": [
+            "{python}",
+            "scripts/nsphere_reference_runs.py",
+            "launch",
+            "C1",
+            "--threads",
+            "6"
+          ],
+          "requires": [
+            "data/ref_nsphere/nsphere"
+          ],
+          "produces": [
+            "results/independent_halo_20261107/nsphere/C1/run.json"
+          ]
+        },
+        {
+          "command": [
+            "{python}",
+            "scripts/nsphere_reference_runs.py",
+            "launch",
+            "C2",
+            "--threads",
+            "6"
+          ],
+          "requires": [
+            "data/ref_nsphere/nsphere"
+          ],
+          "produces": [
+            "results/independent_halo_20261107/nsphere/C2/run.json"
+          ]
+        },
+        {
+          "command": [
+            "{python}",
+            "scripts/nsphere_reference_runs.py",
+            "launch",
+            "C3",
+            "--threads",
+            "6"
+          ],
+          "requires": [
+            "data/ref_nsphere/nsphere"
+          ],
+          "produces": [
+            "results/independent_halo_20261107/nsphere/C3/run.json"
+          ]
+        },
+        {
+          "command": [
+            "{python}",
+            "scripts/nsphere_reference_runs.py",
+            "launch",
+            "C4",
+            "--threads",
+            "6"
+          ],
+          "requires": [
+            "data/ref_nsphere/nsphere"
+          ],
+          "produces": [
+            "results/independent_halo_20261107/nsphere/C4/run.json"
+          ]
+        },
+        {
+          "command": [
+            "{python}",
+            "scripts/nsphere_reference_runs.py",
+            "launch",
+            "B6",
+            "--threads",
+            "9"
+          ],
+          "requires": [
+            "data/ref_nsphere/nsphere"
+          ],
+          "produces": [
+            "results/independent_halo_20261107/nsphere/B6/run.json"
+          ]
+        },
+        {
+          "command": [
+            "{python}",
+            "scripts/nsphere_reference_runs.py",
+            "launch",
+            "B5",
+            "--threads",
+            "9"
+          ],
+          "requires": [
+            "data/ref_nsphere/nsphere"
+          ],
+          "produces": [
+            "results/independent_halo_20261107/nsphere/B5/run.json"
+          ]
+        },
+        {
+          "command": [
+            "{python}",
+            "scripts/independent_halo_analysis.py",
+            "nsphere",
+            "B1"
+          ],
+          "requires": [
+            "results/independent_halo_20261107/nsphere/B1/run.json"
+          ],
+          "produces": [
+            "results/independent_halo_20261107/nsphere_B1.npz"
+          ]
+        },
+        {
+          "command": [
+            "{python}",
+            "scripts/independent_halo_analysis.py",
+            "nsphere",
+            "B2"
+          ],
+          "requires": [
+            "results/independent_halo_20261107/nsphere/B2/run.json"
+          ],
+          "produces": [
+            "results/independent_halo_20261107/nsphere_B2.npz"
+          ]
+        },
+        {
+          "command": [
+            "{python}",
+            "scripts/independent_halo_analysis.py",
+            "nsphere",
+            "C1"
+          ],
+          "requires": [
+            "results/independent_halo_20261107/nsphere/C1/run.json"
+          ],
+          "produces": [
+            "results/independent_halo_20261107/nsphere_C1.npz"
+          ]
+        },
+        {
+          "command": [
+            "{python}",
+            "scripts/independent_halo_analysis.py",
+            "nsphere",
+            "C2"
+          ],
+          "requires": [
+            "results/independent_halo_20261107/nsphere/C2/run.json"
+          ],
+          "produces": [
+            "results/independent_halo_20261107/nsphere_C2.npz"
+          ]
+        },
+        {
+          "command": [
+            "{python}",
+            "scripts/independent_halo_analysis.py",
+            "nsphere",
+            "C3"
+          ],
+          "requires": [
+            "results/independent_halo_20261107/nsphere/C3/run.json"
+          ],
+          "produces": [
+            "results/independent_halo_20261107/nsphere_C3.npz"
+          ]
+        },
+        {
+          "command": [
+            "{python}",
+            "scripts/independent_halo_analysis.py",
+            "nsphere",
+            "C4"
+          ],
+          "requires": [
+            "results/independent_halo_20261107/nsphere/C4/run.json"
+          ],
+          "produces": [
+            "results/independent_halo_20261107/nsphere_C4.npz"
+          ]
+        },
+        {
+          "command": [
+            "{python}",
+            "scripts/independent_halo_analysis.py",
+            "solver",
+            "--alpha",
+            "1.0"
+          ],
+          "requires": [],
+          "produces": [
+            "results/independent_halo_20261107/solver_B_a1.0.npz"
+          ]
+        },
+        {
+          "command": [
+            "{python}",
+            "scripts/independent_halo_analysis.py",
+            "solver",
+            "--alpha",
+            "0.5"
+          ],
+          "requires": [],
+          "produces": [
+            "results/independent_halo_20261107/solver_B_a0.5.npz"
+          ]
+        },
+        {
+          "command": [
+            "{python}",
+            "scripts/independent_halo_analysis.py",
+            "emulator"
+          ],
+          "requires": [
+            "results/runs/gravop_s0"
+          ],
+          "produces": [
+            "results/independent_halo_20261107/emulator_B_nfw.npz"
+          ]
+        },
+        {
+          "command": [
+            "{python}",
+            "scripts/independent_halo_analysis.py",
+            "compare"
+          ],
+          "requires": [
+            "results/independent_halo_20261107/nsphere_C1.npz"
+          ],
+          "produces": [
+            "results/independent_halo_20261107/independent_halo.json"
+          ]
+        },
+        {
+          "command": [
+            "{python}",
+            "scripts/fig_independent_haloes.py"
+          ],
+          "requires": [
+            "results/independent_halo_20261107/independent_halo.json"
+          ],
+          "produces": [
+            "results/figures/fig25_independent_haloes.pdf"
+          ]
+        }
+      ]
+    },
+    "closure": {
+      "steps": [
+        {
+          "command": [
+            "{python}",
+            "scripts/closure_transfer.py"
+          ],
+          "requires": [
+            "results/independent_halo_20261107/independent_halo.json",
+            "results/e2/nbody_profiles.npz"
+          ],
+          "produces": [
+            "results/closure_20261108/transfer.json"
+          ]
+        },
+        {
+          "command": [
+            "{python}",
+            "scripts/gen_dataset_closure.py",
+            "train_alpha_lit",
+            "1300",
+            "--alpha",
+            "0.5",
+            "--C",
+            "0.9",
+            "--workers",
+            "6"
+          ],
+          "requires": [],
+          "produces": [
+            "data/d1/train_alpha_lit.h5"
+          ]
+        },
+        {
+          "command": [
+            "{python}",
+            "scripts/train.py",
+            "--data",
+            "data/d1/train_alpha_lit.h5",
+            "--model",
+            "gravop",
+            "--seed",
+            "0",
+            "--out",
+            "results/closure_20261108/runs/gravop_lit_s0",
+            "--device",
+            "cuda:0"
+          ],
+          "requires": [
+            "data/d1/train_alpha_lit.h5"
+          ],
+          "produces": [
+            "results/closure_20261108/runs/gravop_lit_s0/metrics.json"
+          ]
+        },
+        {
+          "command": [
+            "{python}",
+            "scripts/train.py",
+            "--data",
+            "data/d1/train_alpha_lit.h5",
+            "--model",
+            "gravop",
+            "--seed",
+            "1",
+            "--out",
+            "results/closure_20261108/runs/gravop_lit_s1",
+            "--device",
+            "cuda:0"
+          ],
+          "requires": [
+            "data/d1/train_alpha_lit.h5"
+          ],
+          "produces": [
+            "results/closure_20261108/runs/gravop_lit_s1/metrics.json"
+          ]
+        },
+        {
+          "command": [
+            "{python}",
+            "scripts/train.py",
+            "--data",
+            "data/d1/train_alpha_lit.h5",
+            "--model",
+            "gravop",
+            "--seed",
+            "2",
+            "--out",
+            "results/closure_20261108/runs/gravop_lit_s2",
+            "--device",
+            "cuda:0"
+          ],
+          "requires": [
+            "data/d1/train_alpha_lit.h5"
+          ],
+          "produces": [
+            "results/closure_20261108/runs/gravop_lit_s2/metrics.json"
+          ]
+        },
+        {
+          "command": [
+            "{python}",
+            "scripts/train.py",
+            "--data",
+            "data/d1/train_alpha_lit.h5",
+            "--model",
+            "gravop",
+            "--seed",
+            "3",
+            "--out",
+            "results/closure_20261108/runs/gravop_lit_s3",
+            "--device",
+            "cuda:0"
+          ],
+          "requires": [
+            "data/d1/train_alpha_lit.h5"
+          ],
+          "produces": [
+            "results/closure_20261108/runs/gravop_lit_s3/metrics.json"
+          ]
+        },
+        {
+          "command": [
+            "{python}",
+            "scripts/train.py",
+            "--data",
+            "data/d1/train_alpha_lit.h5",
+            "--model",
+            "gravop",
+            "--seed",
+            "4",
+            "--out",
+            "results/closure_20261108/runs/gravop_lit_s4",
+            "--device",
+            "cuda:0"
+          ],
+          "requires": [
+            "data/d1/train_alpha_lit.h5"
+          ],
+          "produces": [
+            "results/closure_20261108/runs/gravop_lit_s4/metrics.json"
+          ]
+        },
+        {
+          "command": [
+            "{python}",
+            "scripts/closure_emulator_eval.py"
+          ],
+          "requires": [
+            "results/closure_20261108/runs/gravop_lit_s4/metrics.json",
+            "results/runs/gravop_s0"
+          ],
+          "produces": [
+            "results/closure_20261108/emulator.json"
+          ]
+        }
+      ]
+    },
+    "closure_test": {
+      "description": "The conductivity-closure test of the manuscript (Section 4) from the archived particle measurements and fluid grids: ladders, frozen-prediction scores of D1, D2 and E1, E2, the halo B half-step control, the five- and seven-halo fits, robustness, the matched-marker refit, the figures, and the tabulated-closure tests. CPU only; minutes. The particle runs themselves need NSphere (see experiments/research_extensions/README.md).",
+      "steps": [
+        {
+          "command": [
+            "{python}",
+            "experiments/research_extensions/scripts/multifidelity_analysis.py"
+          ],
+          "requires": [
+            "experiments/research_extensions/multifidelity/nsphere/B_N5e4_s11/measures.npz",
+            "results/independent_halo_20261107/nsphere_B1.npz"
+          ],
+          "produces": [
+            "experiments/research_extensions/multifidelity/ladder_analysis.json"
+          ]
+        },
+        {
+          "command": [
+            "{python}",
+            "experiments/research_extensions/scripts/score_D.py"
+          ],
+          "requires": [
+            "experiments/research_extensions/closure_design/PREREGISTRATION_D.json"
+          ],
+          "produces": [
+            "experiments/research_extensions/closure_design/score_D.json"
+          ]
+        },
+        {
+          "command": [
+            "{python}",
+            "experiments/research_extensions/scripts/closure_fit5.py"
+          ],
+          "requires": [
+            "experiments/research_extensions/multifidelity/ladder_analysis.json",
+            "experiments/research_extensions/closure_design/score_D.json",
+            "experiments/research_extensions/learned_closures/closure_scan_D.json"
+          ],
+          "produces": [
+            "experiments/research_extensions/learned_closures/closure_fit5.json"
+          ]
+        },
+        {
+          "command": [
+            "{python}",
+            "experiments/research_extensions/scripts/closure_robustness.py"
+          ],
+          "requires": [
+            "experiments/research_extensions/learned_closures/closure_fit5.json"
+          ],
+          "produces": [
+            "experiments/research_extensions/learned_closures/closure_robustness.json"
+          ]
+        },
+        {
+          "command": [
+            "{python}",
+            "experiments/research_extensions/scripts/score_E.py"
+          ],
+          "requires": [
+            "experiments/research_extensions/closure_design/PREREGISTRATION_E.json"
+          ],
+          "produces": [
+            "experiments/research_extensions/closure_design/score_E.json"
+          ]
+        },
+        {
+          "command": [
+            "{python}",
+            "experiments/research_extensions/scripts/closure_fit7.py"
+          ],
+          "requires": [
+            "experiments/research_extensions/closure_design/score_E.json",
+            "experiments/research_extensions/learned_closures/closure_scan_E.json"
+          ],
+          "produces": [
+            "experiments/research_extensions/learned_closures/closure_fit7.json"
+          ]
+        },
+        {
+          "command": [
+            "{python}",
+            "experiments/research_extensions/scripts/marker_refit.py"
+          ],
+          "requires": [
+            "experiments/research_extensions/learned_closures/closure_scan_traj.npz"
+          ],
+          "produces": [
+            "experiments/research_extensions/learned_closures/marker_refit.json"
+          ]
+        },
+        {
+          "command": [
+            "{python}",
+            "scripts/fig_closure_calibration.py"
+          ],
+          "requires": [
+            "experiments/research_extensions/learned_closures/closure_fit7.json"
+          ],
+          "produces": [
+            "results/figures/fig_calibration.pdf"
+          ]
+        },
+        {
+          "command": [
+            "{python}",
+            "scripts/fig_closure_test.py"
+          ],
+          "requires": [
+            "experiments/research_extensions/learned_closures/closure_fit7.json"
+          ],
+          "produces": [
+            "results/figures/fig_closure.pdf"
+          ]
+        },
+        {
+          "command": [
+            "{python}",
+            "scripts/fig_closure_structure.py"
+          ],
+          "requires": [
+            "experiments/research_extensions/closure_design/score_E.json"
+          ],
+          "produces": [
+            "results/figures/fig_trajectories.pdf",
+            "results/figures/fig_profiles.pdf"
+          ]
+        },
+        {
+          "command": [
+            "{python}",
+            "-m",
+            "pytest",
+            "experiments/research_extensions/tests",
+            "tests/test_closure.py",
+            "-q"
+          ],
+          "requires": [],
+          "produces": []
+        }
+      ]
+    },
+    "closure_fit7_emulator": {
+      "description": "The production dataset regenerated under the recommended seven-halo closure (alpha 0.535, C 0.886) on the same draws and seeds, five members retrained with the production recipe, and their evaluation; one GPU. The trained members are archived.",
+      "steps": [
+        {
+          "command": [
+            "{python}",
+            "scripts/gen_dataset_closure.py",
+            "train_alpha_fit7",
+            "1300",
+            "--alpha",
+            "0.535",
+            "--C",
+            "0.886",
+            "--workers",
+            "6"
+          ],
+          "requires": [],
+          "produces": [
+            "data/d1/train_alpha_fit7.h5"
+          ]
+        },
+        {
+          "command": [
+            "{python}",
+            "scripts/train.py",
+            "--data",
+            "data/d1/train_alpha_fit7.h5",
+            "--model",
+            "gravop",
+            "--seed",
+            "0",
+            "--out",
+            "results/closure_fit7_20261113/runs/gravop_fit7_s0",
+            "--device",
+            "cuda:0"
+          ],
+          "requires": [
+            "data/d1/train_alpha_fit7.h5"
+          ],
+          "produces": [
+            "results/closure_fit7_20261113/runs/gravop_fit7_s0/metrics.json"
+          ]
+        },
+        {
+          "command": [
+            "{python}",
+            "scripts/train.py",
+            "--data",
+            "data/d1/train_alpha_fit7.h5",
+            "--model",
+            "gravop",
+            "--seed",
+            "1",
+            "--out",
+            "results/closure_fit7_20261113/runs/gravop_fit7_s1",
+            "--device",
+            "cuda:0"
+          ],
+          "requires": [
+            "data/d1/train_alpha_fit7.h5"
+          ],
+          "produces": [
+            "results/closure_fit7_20261113/runs/gravop_fit7_s1/metrics.json"
+          ]
+        },
+        {
+          "command": [
+            "{python}",
+            "scripts/train.py",
+            "--data",
+            "data/d1/train_alpha_fit7.h5",
+            "--model",
+            "gravop",
+            "--seed",
+            "2",
+            "--out",
+            "results/closure_fit7_20261113/runs/gravop_fit7_s2",
+            "--device",
+            "cuda:0"
+          ],
+          "requires": [
+            "data/d1/train_alpha_fit7.h5"
+          ],
+          "produces": [
+            "results/closure_fit7_20261113/runs/gravop_fit7_s2/metrics.json"
+          ]
+        },
+        {
+          "command": [
+            "{python}",
+            "scripts/train.py",
+            "--data",
+            "data/d1/train_alpha_fit7.h5",
+            "--model",
+            "gravop",
+            "--seed",
+            "3",
+            "--out",
+            "results/closure_fit7_20261113/runs/gravop_fit7_s3",
+            "--device",
+            "cuda:0"
+          ],
+          "requires": [
+            "data/d1/train_alpha_fit7.h5"
+          ],
+          "produces": [
+            "results/closure_fit7_20261113/runs/gravop_fit7_s3/metrics.json"
+          ]
+        },
+        {
+          "command": [
+            "{python}",
+            "scripts/train.py",
+            "--data",
+            "data/d1/train_alpha_fit7.h5",
+            "--model",
+            "gravop",
+            "--seed",
+            "4",
+            "--out",
+            "results/closure_fit7_20261113/runs/gravop_fit7_s4",
+            "--device",
+            "cuda:0"
+          ],
+          "requires": [
+            "data/d1/train_alpha_fit7.h5"
+          ],
+          "produces": [
+            "results/closure_fit7_20261113/runs/gravop_fit7_s4/metrics.json"
+          ]
+        },
+        {
+          "command": [
+            "{python}",
+            "scripts/closure_fit_emulator_eval.py",
+            "--dir",
+            "results/closure_fit7_20261113",
+            "--prefix",
+            "gravop_fit7_s",
+            "--alpha",
+            "0.535",
+            "--C",
+            "0.886"
+          ],
+          "requires": [
+            "results/closure_fit7_20261113/runs/gravop_fit7_s4/metrics.json",
+            "results/runs/gravop_s0"
+          ],
+          "produces": [
+            "results/closure_fit7_20261113/emulator.json"
+          ]
+        }
+      ]
+    },
+    "uncertainty": {
+      "description": "Clock-error propagation, coverage events and the end-to-end solver-fallback gate of the manuscript (Section 6), from the archived baryon-aware members and dataset; one GPU, minutes. Replays the archived records exactly apart from measured timings.",
+      "steps": [
+        {
+          "command": [
+            "{python}",
+            "experiments/research_extensions/scripts/clock_uq.py"
+          ],
+          "requires": [
+            "data/baryons/train.h5",
+            "results/baryons_20261107/runs/seed0/model.pt",
+            "results/baryons_20261107/runs/seed1/model.pt",
+            "results/baryons_20261107/runs/seed2/model.pt"
+          ],
+          "produces": [
+            "experiments/research_extensions/clock_uq/clock_uq.json"
+          ]
+        },
+        {
+          "command": [
+            "{python}",
+            "experiments/research_extensions/scripts/clock_uq_events.py"
+          ],
+          "requires": [
+            "data/baryons/train.h5",
+            "results/baryons_20261107/runs/seed0/model.pt",
+            "results/baryons_20261107/runs/seed1/model.pt",
+            "results/baryons_20261107/runs/seed2/model.pt"
+          ],
+          "produces": [
+            "experiments/research_extensions/clock_uq/clock_uq_events.json"
+          ]
+        },
+        {
+          "command": [
+            "{python}",
+            "experiments/research_extensions/scripts/gate_e2e.py"
+          ],
+          "requires": [
+            "data/baryons/train.h5",
+            "results/baryons_20261107/runs/seed0/model.pt",
+            "results/baryons_20261107/runs/seed1/model.pt",
+            "results/baryons_20261107/runs/seed2/model.pt"
+          ],
+          "produces": [
+            "experiments/research_extensions/clock_uq/gate_e2e.json",
+            "experiments/research_extensions/clock_uq/gate_e2e.npz"
+          ]
+        },
+        {
+          "command": [
+            "{python}",
+            "scripts/fig_clock_uq.py"
+          ],
+          "requires": [
+            "experiments/research_extensions/clock_uq/clock_uq.json",
+            "data/baryons/train.h5",
+            "results/baryons_20261107/runs/seed0/model.pt",
+            "results/baryons_20261107/runs/seed1/model.pt",
+            "results/baryons_20261107/runs/seed2/model.pt"
+          ],
+          "produces": [
+            "results/figures/fig_clock_uq.pdf"
+          ]
+        }
+      ]
     }
   }
 }

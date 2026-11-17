@@ -7,7 +7,11 @@
   "gen_seconds": 2.2,
   "path": "data/sc/rd.h5",
   "fields": 1,
-  "tau_points": 48
+  "tau_points": 48,
+  "content_sha256": "884852fcbb4d18d4176f06c3b3e59707d808c98af8194a8896de2aa42512da23",
+  "content_sha256_excludes": [
+   "wall"
+  ]
  },
  "ks": {
   "requested": 600,
@@ -17,7 +21,11 @@
   "gen_seconds": 6.7,
   "path": "data/sc/ks.h5",
   "fields": 1,
-  "tau_points": 48
+  "tau_points": 48,
+  "content_sha256": "03598b1b5c572f332f365762431cf94fa30082cca668d23b45708eda309ee5d0",
+  "content_sha256_excludes": [
+   "wall"
+  ]
  },
  "film": {
   "requested": 600,
@@ -27,7 +35,11 @@
   "gen_seconds": 4.6,
   "path": "data/sc/film.h5",
   "fields": 1,
-  "tau_points": 48
+  "tau_points": 48,
+  "content_sha256": "b70d08a52ad4162d10546e0d0edc6cae8421fa9828dbc74640191aac75d9d6e8",
+  "content_sha256_excludes": [
+   "wall"
+  ]
  },
  "burgers": {
   "requested": 600,
@@ -37,6 +49,10 @@
   "gen_seconds": 1.5,
   "path": "data/sc/burgers.h5",
   "fields": 1,
-  "tau_points": 48
+  "tau_points": 48,
+  "content_sha256": "32b55e308122f244b841f3e4b9ef4c67753a63562b166296c78d6af94cbb88db",
+  "content_sha256_excludes": [
+   "wall"
+  ]
  }
 }

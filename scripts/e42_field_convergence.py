@@ -47,6 +47,9 @@ from gravop import solver                                         # noqa: E402
 
 OUT = os.path.join(ROOT, 'results', 'e40')
 SHELLS = (150, 300, 600, 1200)
+# the isolated-run conductivity (E2: C * s = 0.753 * 0.945); run at 0.797 until
+# the 2026-10-15 rerun, before which that value was the inverted C / s
+C_EFF = 0.712
 MAX_SNAPS = 6000          # must not bind; asserted in run()
 MAX_TAU_GAP = 0.02        # refuse to interpolate across a wider gap
 PHASES = np.array([0.1, 0.25, 0.5, 0.75, 0.9, 0.95, 0.99])
@@ -60,7 +63,7 @@ CASES = [
 def run(sh, wh, N):
     t0 = time.time()
     r = solver.run_halo(sigma_m=sh, w=wh, model_lmfp='yukawa_tu',
-                        model_smfp='yukawa_tu', C=0.797, n_shells=N,
+                        model_smfp='yukawa_tu', C=C_EFF, n_shells=N,
                         eps_t=3e-4, rho_c_factor=300.0, t_end=1e5,
                         kn_min=0.02, max_steps=20_000_000, max_snaps=MAX_SNAPS,
                         timestep_mode='implicit')

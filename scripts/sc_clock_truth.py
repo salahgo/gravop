@@ -146,5 +146,52 @@ def main():
     print('wrote', path)
 
 
+def main_sidm():
+    """The same estimate for `sidm` (added 2026-10-15).
+
+    `sidm` was left out because no grid-convergence measurement of its labels
+    existed. `sc_sidm_reference.py` now provides one for the density-terminated
+    trajectories (fixed enclosed mass, production grid against twice it). A
+    twofold reference understates the label error (P21: by about a third), so
+    the correction computed here is a lower bound. Written to its own record so
+    the four reference systems' record is untouched.
+    """
+    sr = json.load(open(os.path.join(OUT, 'sidm_reference.json')))
+    th = json.load(open(os.path.join(OUT, 'timehead.json')))['sidm']
+    grid = sr['rel_dt_sing_median']
+    head = th['converged_head_err_pct'] / 100.0
+    total = float(np.hypot(head, grid))
+    E_A = th['armA']
+    F = floor_at('sidm', [head, total])
+    rec = {
+        'head_vs_label': head,
+        'label_vs_truth_grid_2x': grid,
+        'label_error_scope': sr.get('scope'),
+        'effective_vs_truth': total,
+        'grid_dominates': bool(grid > head),
+        'inflation_of_clock_error': total / head,
+        'armA_oracle_error': E_A,
+        'floor_at_head_error': F[head]['F'],
+        'floor_at_effective_error': F[total]['F'],
+        'penalty_predicted_at_head_error': float(np.hypot(E_A, F[head]['F']) / E_A),
+        'penalty_predicted_at_effective_error': float(np.hypot(E_A, F[total]['F']) / E_A),
+        'penalty_measured_converged': th['penalty_converged'],
+        'note': ('lower bound: the label error is measured against a twofold '
+                 'reference, which P21 found understates it by about a third'),
+        '_provenance': stamp('sc_clock_truth.py --sidm'),
+    }
+    rec['penalty_understated_by'] = (rec['penalty_predicted_at_effective_error']
+                                     / rec['penalty_predicted_at_head_error'])
+    path = os.path.join(OUT, 'clock_truth_sidm.json')
+    json.dump(rec, open(path, 'w'), indent=1)
+    print(f"sidm head {100*head:.4f}%  grid {100*grid:.4f}%  inflation "
+          f"{rec['inflation_of_clock_error']:.2f}x  penalty understated by "
+          f"{rec['penalty_understated_by']:.3f}x")
+    print('wrote', path)
+
+
 if __name__ == '__main__':
-    main()
+    if '--sidm' in sys.argv[1:]:
+        main_sidm()
+    else:
+        main()

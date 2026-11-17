@@ -2,16 +2,30 @@
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 
-**Conditioning coordinates for neural PDE surrogates — a solver-computable
-predictor of deployed accuracy, with a fast gravothermal SIDM solver and
-emulator as the reference application.**
+**A fast gravothermal solver and neural emulator for self-interacting dark
+matter (SIDM) haloes, with a conductivity closure tested against kinetic
+particle simulations.**
 
-A neural operator trained in normalised time `tau = t / t_sing` needs a
-terminal clock that is available when the model is scored and unavailable when
-it is used. This repository measures that cost on one protocol across five
-systems, shows that the gap is organised by a displacement computable from the
-solver alone before any network is trained, and applies the result to
-gravothermal collapse of self-interacting dark matter haloes.
+The `gravop` package evolves the gravothermal collapse of SIDM haloes with a
+semi-implicit Lagrangian solver, about three orders of magnitude cheaper than
+explicit integration at equal accuracy. Its conductivity interpolation between
+the short- and long-mean-free-path regimes is selectable at run time
+(`gravop.closure`) and has been tested against NSphere particle simulations of
+six haloes, four of them predicted before they were simulated, and against a
+public N-body simulation. The harmonic interpolation of the public fluid codes
+fails below a central Knudsen number of about one. The recommended closure
+(`gravop.closure.CALIBRATED`, alpha = 0.535 and C = 0.886) fits all seven
+references to within 5.5%, with a systematic uncertainty of about 5% in
+collapse time. A Fourier neural operator emulates the density and
+velocity-dispersion evolution with a learned collapse clock, and propagating
+that clock's error gives uncertainty bands that decide when to call the
+solver. Static baryonic potentials and Bayesian cross-section inference are
+included.
+
+The repository also holds `statecond`, a benchmark of conditioning coordinates
+for neural surrogates of PDEs that end at a solution-dependent time (four
+reference systems), which the SIDM emulator was originally developed against.
+It is documented in [`STATECOND_BENCHMARK.md`](STATECOND_BENCHMARK.md).
 
 ## Contents
 
@@ -27,11 +41,11 @@ snapshot; `scripts/verify_release.sh` recomputes it.
 
 | Path | Contents |
 |---|---|
-| `src/gravop/` | gravothermal solver, emulator, dataset builder |
+| `src/gravop/` | gravothermal solver, its static-baryon extension (`baryons.py`) and selectable conductivity closure (`closure.py`), emulator, dataset builder |
 | `src/statecond/` | the four reference PDE systems, operator backbones, data |
 | `scripts/` | experiment, analysis and figure scripts; `scripts/cuda/halo.cu` is an evaluated GPU prototype that was not adopted |
 | `tests/` | the acceptance-gate suite |
-| `docs/` | pre-registrations, frozen protocols and the reports of the forecasting studies |
+| `docs/` | pre-registrations, frozen protocols and results reports, including the disjoint-system transfer study (`docs/DISJOINT_PREREGISTRATION.md`, `docs/TRACK_B_RESULTS_2026-11-06.md`) |
 | `REPRODUCING.md` | what each reproduction target establishes and needs, a path that retrains nothing, and what is not archived |
 | `DATA.md` | data provenance, URLs, licences, access conditions |
 | `STATECOND_BENCHMARK.md` | the benchmark guide, gated against the records |
@@ -54,7 +68,7 @@ pip install -e ".[all]"
 
 Python 3.10 or later. The solver and the acceptance suite are CPU-only; a GPU
 is needed only to retrain the emulator. `requirements.lock` records the
-environment that produced the published numbers and is not an install script —
+environment that produced the published numbers and is not an install script;
 see its header.
 
 ## Usage
@@ -74,10 +88,24 @@ res['t'], res['r'], res['rho'], res['p']     # snapshot arrays
 res['status']   # 0 collapse, 1 time horizon, 2 Knudsen floor
 ```
 
+With the closure calibrated against the particle references:
+
+```python
+from gravop import closure, solver
+
+r, m, rho, p = solver.nfw_profile(0.01, 100.0, 300)
+res = closure.run_halo_g(sigma_m=2.0, **closure.CALIBRATED, r=r, m=m, rho=rho, p=p,
+                         eps_t=3e-4, timestep_mode='implicit', kn_min=0.02)
+```
+
 The emulator is used through the same package; `scripts/e11_emulator_vs_nbody.py`
-is a complete worked example. Trained weights are not archived; they are
-regenerated from the released generators with the recorded seeds and training
-arguments.
+is a complete worked example. The five members retrained on the recommended
+closure are in the archival record
+(`results/closure_fit7_20261113/runs/gravop_fit7_s*/model.pt`) and load with
+`load_model` in `scripts/evaluate_all.py`; so are the three baryon-aware
+members (`results/baryons_20261107/runs/seed*/model.pt`). The other trained
+weights are not archived; they are regenerated from the released generators with the recorded
+seeds and training arguments.
 
 Individual stages:
 
@@ -93,12 +121,17 @@ Individual stages:
 | `python scripts/e9_inference.py mock` | Bayesian inference |
 | `python scripts/e10_resolution.py` | zero-shot resolution transfer |
 | `python scripts/make_figures.py` | application figures |
+| `python experiments/research_extensions/scripts/closure_fit5.py` | five-halo closure fit and leave-one-out (needs the archive record) |
+| `python experiments/research_extensions/scripts/score_E.py`, `closure_fit7.py` | test on the pre-registered family E, seven-halo fit (recommended closure) |
+| `python scripts/reproduce.py closure_test --execute` | every stored-data stage of the closure test, its figures and tests (CPU, minutes) |
+| `python scripts/fig_closure_test.py`, `fig_closure_calibration.py`, `fig_closure_structure.py` | closure-test figures |
+| `python scripts/fig_clock_uq.py` | clock-error propagation figure (GPU) |
 | `python scripts/sc_figures.py` | method figures |
 
 ## Reproduction
 
-Extract the archival record's `results/` at the root of this checkout
-(`unzip <record>.zip 'results/*'`). The suite then runs end to end with no
+Extract the archival record's `results/`, `experiments/` and `data/` at the
+root of this checkout (`unzip <record>.zip 'results/*' 'experiments/*' 'data/*'`). The suite then runs end to end with no
 network access, no GPU and no external data:
 
 ```bash
@@ -109,6 +142,8 @@ Reproduction targets, from cheapest to most expensive:
 
 ```bash
 python scripts/reproduce.py verify --execute   # gates and stored-result consistency
+python scripts/reproduce.py closure_test --execute  # the closure test from the archived measurements
+python scripts/reproduce.py uncertainty --execute   # clock-error, coverage and gate studies (one GPU, minutes)
 python scripts/reproduce.py methods            # canonical retraining sequence (plan)
 ```
 
@@ -144,19 +179,35 @@ A verification gate computes its assertion in the session from the solver, the
 data, the model code or a checkpoint's own behaviour, so a wrong number stored
 under `results/` cannot make it pass. A regression gate reads a stored summary
 or per-record array under `results/` and checks a quoted value against it or
-recomputes one from it, so it pins consistency rather than correctness. Of the
-229 gates, 158 are verification and 71 regression.
+recomputes one from it, so it pins consistency and not correctness. Of the
+241 gates, 168 are verification and 73 regression.
 
 External validation:
 
-- The velocity-dependence kernel reproduces the public GravothermalSIDM
-  reference implementation bit-identically in double precision, and the full
-  solver agrees with it to 0.13% in collapse time.
+- The solver agrees with the public GravothermalSIDM reference implementation
+  to 0.13% in collapse time, and its velocity-dependence kernel is identical in
+  double precision.
 - Against the public isolated-halo N-body core-collapse run of Fischer, Yu &
   Dolag (2025), the solver agrees to 0.020 dex and the emulator alone to
-  0.023 dex under a single fitted conductivity parameter.
-- The exact error decomposition closes on every measured point to a relative
-  residual below 1e-7.
+  0.023 dex under a single calibrated conductivity.
+- Against NSphere particle references converged in particle number and time
+  step (haloes B, C and the pre-registered D1, D2), the harmonic closure misses
+  the collapse time by up to 20% (5.9 sigma on D1, chi2 57 over five haloes);
+  the five-halo fit (alpha 0.58, C 0.85) has chi2 3.9 for 3 degrees of freedom
+  (4.2 from direct solver runs at the best fit) and predicts every halo left out of the fit to within 7%. Frozen and tested
+  on a further pre-registered family, it passed halo E1 inside its range and
+  failed E2 below it (11% early); the harmonic closure misses E2 by 29%. The
+  fit to all seven haloes (alpha 0.535, C 0.886; chi2 10.0 for 5 degrees of
+  freedom) is the recommended closure. It was fitted after that test and has
+  not itself been tested on new haloes. Code and protocol:
+  `experiments/research_extensions/README.md`,
+  [`docs/CLOSURE_TEST_PREREGISTRATION.md`](docs/CLOSURE_TEST_PREREGISTRATION.md),
+  [`docs/CLOSURE_TEST_RESULTS_2026-11-12.md`](docs/CLOSURE_TEST_RESULTS_2026-11-12.md).
+- Propagating the emulator's clock error raises the AUROC for detecting
+  predictions with more than 10% error from 0.80 to 0.95 on test haloes.
+- The static-baryon module reproduces the published fluid collapse times of
+  Zhong, Yang & Yu (2023) to within 2% for their constant cross-section of
+  10 cm^2/g, 5% for their most compact baryons and 12% at 100 cm^2/g.
 
 If you are reviewing this work, start with
 [`REPRODUCING.md`](REPRODUCING.md): it says how the two trees fit together,
@@ -170,10 +221,9 @@ Cite the software as:
 ```bibtex
 @software{gravop,
   author  = {Gontara, Salah},
-  title   = {GravOp: conditioning-coordinate benchmarks for neural PDE
-             surrogates, with a gravothermal self-interacting dark matter
-             solver and emulator},
-  version = {1.0.0},
+  title   = {GravOp: fast gravothermal evolution of self-interacting dark
+             matter haloes, with a kinetically tested conductivity closure},
+  version = {1.2.0},
   url     = {https://github.com/salahgo/gravop}
 }
 ```
@@ -203,6 +253,6 @@ Contributions are welcome; see [`CONTRIBUTING.md`](CONTRIBUTING.md) and
 [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md). Release history is in
 [`CHANGELOG.md`](CHANGELOG.md).
 
-Maintainer: Salah Gontara, Ecole Polytechnique de Sousse — salah.gontara@polytecsousse.tn.
+Maintainer: Salah Gontara, Ecole Polytechnique de Sousse, salah.gontara@polytecsousse.tn.
 Please open an issue rather than writing privately when the question is about
 the code or a published number.

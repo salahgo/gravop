@@ -53,9 +53,9 @@ OM, OL, H0_GYR = 0.286, 0.714, 13.968
 # with the fluid model compared at t_fluid = s * t_nbody; t scales as 1/C in
 # the long-mean-free-path regime, so the matching constant is C * s =
 # 0.753 * 0.945 = 0.712 (corrected 2026-10-09 from the inverted C / s = 0.797;
-# checked by scoring the fluid model against the N-body snapshots unrescaled:
-# 0.0205 dex at C = 0.712, 0.088 at 0.753, and 0.797 collapses before snapshot
-# 045).
+# scripts/e2_calibration_fit.py checks it by running the solver at that C and
+# scoring it against the N-body snapshots unrescaled: 0.0206 dex at 0.712,
+# 0.088 at 0.753).
 ISOLATED_C = 0.712
 
 

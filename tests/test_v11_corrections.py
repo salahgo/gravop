@@ -16,6 +16,18 @@ import pytest
 
 ROOT = os.path.join(os.path.dirname(__file__), '..')
 RES = os.path.join(ROOT, 'results')
+
+
+def _need(*rel):
+    """Skip when the archival record this gate reads is absent.
+
+    The source release ships without `results/`; the suite is meant to run
+    once the archival tree is unpacked beside it (REPRODUCING.md). A missing
+    record is then a skip that says so, not a FileNotFoundError.
+    """
+    missing = [p for p in rel if not os.path.exists(os.path.join(ROOT, p))]
+    if missing:
+        pytest.skip('archival record absent: ' + ', '.join(missing))
 sys.path.insert(0, os.path.join(ROOT, 'scripts'))
 sys.path.insert(0, os.path.join(ROOT, 'src'))
 
@@ -479,6 +491,7 @@ def test_the_quadrature_residual_is_an_identity_in_three_measured_quantities():
     decomposition is wrong, so the bar is machine epsilon rather than a
     tolerance chosen to pass.
     """
+    _need('results/statecond/decomposition.json')
     import numpy as np
     sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'scripts'))
     from d0_identity_check import (diagnostics, residual_from_identity,
@@ -514,6 +527,7 @@ def test_the_matched_accuracy_speedup_is_the_stated_interpolation():
     right and the stated target was wrong -- the artefact interpolates at 3e-4.
     Nothing caught that, because every gate on this claim compared 928 with 928.
     """
+    _need('results/e8/workprecision.json')
     import json, math
     rec = json.load(open(os.path.join(ROOT, 'results', 'e8', 'workprecision.json')))
 
@@ -556,6 +570,7 @@ def test_the_serving_regime_of_each_input_path_is_recomputed_from_the_records():
     table is fixed on the oracle path; this recomputes where the deployed path
     sits against it, and pins the regime it finds.
     """
+    _need('results/statecond/conformal_deployed_records.npz')
     import json
     import numpy as np
 
@@ -606,6 +621,7 @@ def test_the_gate_statistic_and_its_budget_ladder_share_one_unit():
     ones through the recorded scales, which holds only if all three come from
     the same half-widths.
     """
+    _need('results/statecond/conformal_deployed_records.npz')
     import json
     import numpy as np
 
@@ -672,6 +688,7 @@ def test_the_matched_accuracy_speedup_survives_its_timing_uncertainty():
     carrying the measured semi-implicit spreads, and pins what that
     construction gives.
     """
+    _need('results/e8/workprecision.json')
     import itertools
     import json
 

@@ -171,10 +171,17 @@ def test_the_archive_does_not_duplicate_the_source_release():
     carry, and each describes its own tree.
     """
     out = os.path.join(ROOT, 'public-artifacts')
-    assert sorted(os.listdir(out)) == ['github', 'zenodo']
+    # SYNC_REPORT.md is the maintainer's audit of the trees against the
+    # manuscript; it sits beside them and is in neither.
+    assert sorted(os.listdir(out)) == ['SYNC_REPORT.md', 'github', 'zenodo'] \
+        or sorted(os.listdir(out)) == ['github', 'zenodo']
     zen = os.path.join(out, 'zenodo')
+    # results/: every result record and the figures; experiments/: the
+    # closure-test and uncertainty records and measurements; data/: the
+    # baryonic dataset the uncertainty studies read.
     assert sorted(os.listdir(zen)) == ['.zenodo.json', 'ARCHIVE.md',
-                                       'MANIFEST.sha256', 'results']
+                                       'MANIFEST.sha256', 'data', 'experiments',
+                                       'results']
     gh = os.path.join(out, 'github')
     shared = []
     for dirpath, _, filenames in os.walk(zen):

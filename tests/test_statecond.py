@@ -19,6 +19,15 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'scripts'))
 from statecond import data as scd            # noqa: E402
 from statecond.pdes import SYSTEMS, N_X      # noqa: E402
 
+
+def _need(*rel):
+    """Skip when the archival record this gate reads is absent (the source
+    release ships without `results/`; see REPRODUCING.md)."""
+    root = os.path.join(os.path.dirname(__file__), '..')
+    missing = [p for p in rel if not os.path.exists(os.path.join(root, p))]
+    if missing:
+        pytest.skip('archival record absent: ' + ', '.join(missing))
+
 NAMES = list(SYSTEMS)
 
 
@@ -407,6 +416,7 @@ def test_displacement_outpredicts_the_law_out_of_system():
     recomputes both predictors from the committed artefacts rather than
     comparing stored numbers, so it fails if either the floor or the law moves.
     """
+    _need('results/statecond/law.json', 'results/statecond/floor.json')
     import json
     import sc_stats
     root = os.path.join(os.path.dirname(__file__), '..')
@@ -677,6 +687,7 @@ def test_benchmark_guide_numbers_match_the_artefacts():
     only thing that keeps a document nobody runs in step with results
     everybody does.
     """
+    _need('results/statecond/contract.json')
     sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'scripts'))
     from check_benchmark_numbers import checks
     doc = open(os.path.join(os.path.dirname(__file__), '..',
@@ -952,6 +963,7 @@ def test_the_set_of_unstamped_artefacts_is_the_one_the_paper_declares():
     repaired with a stamp written today, and this gate keeps the reported
     number honest by failing when a fourth file drifts into the same state.
     """
+    _need('results/statecond/contract.json')
     import re
     from sc_provenance import check
 
