@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 # Create a virtual environment, install the package, and run the gate suite.
-#
 # This is the documented install path and the one a third party should use.
 # `requirements.lock` is a record of the environment that produced the
 # published numbers, not an install script: its torch line is a local file
